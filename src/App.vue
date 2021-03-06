@@ -1,28 +1,54 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <v-app>
+    <v-app-bar
+      app
+      style="background-color: wheat"
+    >
+      <div class="d-flex align-center">
+        <v-app-bar-title>Web Indeksleme (KOU)</v-app-bar-title>
+      </div>
+
+      <v-spacer></v-spacer>
+
+      <v-btn
+        href="https://github.com/vuetifyjs/vuetify/releases/latest"
+        target="_blank"
+        text
+      >
+        <span class="mr-2">Latest Release</span>
+        <v-icon>mdi-open-in-new</v-icon>
+      </v-btn>
+    </v-app-bar>
+
+    <v-main>
+      <tab-wrapper :layout="propsCars"/>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import TabWrapper from "@/components/TabWrapper";
+import URLFrekans from "@/components/childs/URLFrekans";
+import URLAnahtarKelime from "@/components/childs/URLAnahtarKelime";
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
-}
-</script>
+    TabWrapper
+  },
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+  data: () => ({
+    //
+    propsCars: [
+      {
+        label: 'URL Frekans Hesabı',
+        component: URLFrekans
+      },
+      {
+        label: 'URL Anahtar Kelime',
+        component: URLAnahtarKelime
+      }
+    ]
+  }),
+};
+</script>
