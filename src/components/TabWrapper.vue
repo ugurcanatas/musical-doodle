@@ -1,7 +1,7 @@
 <template>
   <v-row no-gutters>
     <v-col class="col-6 pa-2" v-for="(item,i) in layout" :key="i">
-      <component :is="item.component" :label="item.label" />
+      <component :is="item.component" :component-item="item" />
     </v-col>
   </v-row>
 </template>

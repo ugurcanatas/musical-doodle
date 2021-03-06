@@ -6,8 +6,8 @@
       @frekansDialogClosed="frekansDialogClosed"
     />
     <v-card>
-      <v-app-bar color="indigo" dense>
-        <v-app-bar-title class="white--text">{{ label }}</v-app-bar-title>
+      <v-app-bar :color="componentItem.barColor" dense>
+        <v-app-bar-title class="white--text">{{ componentItem.label }}</v-app-bar-title>
         <v-spacer></v-spacer>
         <v-btn
           @click="request"
@@ -16,6 +16,7 @@
           fab
           icon
           :loading="buttonLoading"
+          :disabled="buttonLoading"
           ><v-icon>mdi-download</v-icon></v-btn
         >
         <v-btn
@@ -60,9 +61,9 @@ import { defaultRule } from "@/components/utils";
 export default {
   name: "URLFrekans",
   props: {
-    label: {
+    componentItem: {
       required: false,
-      type: String
+      type: Object
     }
   },
   components: {
@@ -76,7 +77,8 @@ export default {
         "https://loremipsum.io/",
         "https://lite.cnn.com/en",
         "https://en.m.wikipedia.org/wiki/Riegelmann_Boardwalk",
-        "https://rawtext.club/"
+        "https://rawtext.club/",
+        "https://lite.poandpo.com/"
       ],
       chipModel: [0],
       chips: ["p", "h1", "h2", "h3", "h4", "h5", "blockquote"],
@@ -126,7 +128,7 @@ export default {
       this.scrapedText = texts.join(" ").replace(/[.()-,\n?!,*'":;]/g, "");
       this.eachWordArray = this.scrapedText
         .split(" ")
-        .filter(m => m.length !== 0 || m === "↵");
+        .filter(m => m.length !== 0);
       console.log("Scraped Text = > ", this.scrapedText);
       console.log("Each Word Array = > ", this.eachWordArray);
 

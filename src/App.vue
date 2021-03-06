@@ -42,11 +42,13 @@ export default {
     propsCars: [
       {
         label: 'URL Kelime Frekans',
-        component: URLFrekans
+        component: URLFrekans,
+        barColor: '#3d52d4'
       },
       {
         label: 'URL Anahtar Kelime/Etiket',
-        component: URLAnahtarKelime
+        component: URLAnahtarKelime,
+        barColor: '#52abae'
       }
     ]
   }),
