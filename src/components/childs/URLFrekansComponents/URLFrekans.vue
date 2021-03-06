@@ -2,12 +2,14 @@
   <div>
     <u-r-l-frekans-dialog
       :sorted-frequency="sortedFrequency"
-        :dialog-model="showDialog"
+      :dialog-model="showDialog"
       @frekansDialogClosed="frekansDialogClosed"
     />
     <v-card>
       <v-app-bar :color="componentItem.barColor" dense>
-        <v-app-bar-title class="white--text">{{ componentItem.label }}</v-app-bar-title>
+        <v-app-bar-title class="white--text">{{
+          componentItem.label
+        }}</v-app-bar-title>
         <v-spacer></v-spacer>
         <v-btn
           @click="request"
@@ -56,7 +58,7 @@
 <script>
 import URLFrekansDialog from "@/components/childs/URLFrekansComponents/URLFrekansDialog";
 import axios from "axios";
-import { defaultRule } from "@/components/utils";
+import { defaultRule, reducerFrequency } from "@/components/utils";
 
 export default {
   name: "URLFrekans",
@@ -89,7 +91,7 @@ export default {
       dialog: false,
       showDialog: false,
       sortedFrequency: [],
-      buttonDisabled: true,
+      buttonDisabled: true
     };
   },
   computed: {
@@ -132,16 +134,7 @@ export default {
       console.log("Scraped Text = > ", this.scrapedText);
       console.log("Each Word Array = > ", this.eachWordArray);
 
-      const freq = this.eachWordArray.reduce((p, c) => {
-        p[c] = (p[c] || 0) + 1;
-        return p;
-      }, {});
-
-      this.sortedFrequency = Object.keys(freq)
-        .map(m => {
-          return { text: m, size: freq[m] };
-        })
-        .sort((a, b) => (a.size < b.size ? 1 : -1));
+      this.sortedFrequency = reducerFrequency(this.eachWordArray);
       console.log("Frequency", this.sortedFrequency);
       this.buttonDisabled = false;
     },

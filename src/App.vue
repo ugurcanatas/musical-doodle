@@ -29,7 +29,7 @@
 <script>
 import TabWrapper from "@/components/TabWrapper";
 import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
-import URLAnahtarKelime from "@/components/childs/URLAnahtarKelime";
+import URLAnahtarKelime from "@/components/childs/URLAnahtarKelimeComponent/URLAnahtarKelime";
 
 export default {
   name: 'App',
