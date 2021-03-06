@@ -28,7 +28,7 @@
 
 <script>
 import TabWrapper from "@/components/TabWrapper";
-import URLFrekans from "@/components/childs/URLFrekans";
+import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
 import URLAnahtarKelime from "@/components/childs/URLAnahtarKelime";
 
 export default {
@@ -41,11 +41,11 @@ export default {
     //
     propsCars: [
       {
-        label: 'URL Frekans Hesabı',
+        label: 'URL Kelime Frekans',
         component: URLFrekans
       },
       {
-        label: 'URL Anahtar Kelime',
+        label: 'URL Anahtar Kelime/Etiket',
         component: URLAnahtarKelime
       }
     ]

@@ -1,12 +1,18 @@
 <template>
   <v-card>
     <v-card-title v-text="label" />
-    <v-combobox label="Url giriniz" :rules="getDefaultRule"  :items="defaultComboItems" item-text="Text" item-value="Url"/>
+    <v-combobox
+      label="Url giriniz"
+      :rules="getDefaultRule"
+      :items="defaultComboItems"
+      item-text="Text"
+      item-value="Url"
+    />
   </v-card>
 </template>
 
 <script>
-import {defaultRule} from "@/components/default_rules";
+import { defaultRule } from "@/components/utils";
 
 export default {
   name: "URLAnahtarKelime",
@@ -18,20 +24,18 @@ export default {
   },
   computed: {
     getDefaultRule: function() {
-      return defaultRule
+      return defaultRule;
     }
   },
-  data () {
+  data() {
     return {
       defaultComboItems: [
-        {Text: 'Google', Url: 'https://google.com'},
-        {Text: 'Tesla', Url: 'https://tesla.com'}
+        { Text: "Google", Url: "https://google.com" },
+        { Text: "Tesla", Url: "https://tesla.com" }
       ]
-    }
+    };
   }
-}
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
