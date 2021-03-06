@@ -55,6 +55,13 @@
           </v-card-text>
         </v-col>
       </v-row>
+      <v-row no-gutters>
+        <v-card-title>Benzerlik Oranı</v-card-title>
+        <svg width="500" height="60">
+          <rect id="svgBenzerlik" width="400" height="50" x="50" fill="wheat" rx="10"/>
+          <text id="svgBenzerlikText" text-anchor="middle" x="245" y="30" fill="black">%100</text>
+        </svg>
+      </v-row>
     </v-card>
   </v-dialog>
 </template>

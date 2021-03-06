@@ -1,9 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      style="background-color: wheat"
-    >
+    <v-app-bar app style="background-color: wheat">
       <div class="d-flex align-center">
         <v-app-bar-title>Web Indeksleme (KOU)</v-app-bar-title>
       </div>
@@ -21,7 +18,7 @@
     </v-app-bar>
 
     <v-main>
-      <tab-wrapper :layout="propsCars"/>
+      <tab-wrapper :layout="propsCars" />
     </v-main>
   </v-app>
 </template>
@@ -32,7 +29,7 @@ import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
 import URLAnahtarKelime from "@/components/childs/URLAnahtarKelimeComponent/URLAnahtarKelime";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     TabWrapper
   },
@@ -41,16 +38,22 @@ export default {
     //
     propsCars: [
       {
-        label: 'URL Kelime Frekans',
+        label: "URL Kelime Frekans",
         component: URLFrekans,
-        barColor: '#3d52d4'
+        barColor: "#3d52d4"
       },
       {
-        label: 'URL Anahtar Kelime/Etiket',
+        label: "URL Anahtar Kelime/Etiket",
         component: URLAnahtarKelime,
-        barColor: '#52abae'
+        barColor: "#52abae"
       }
     ]
-  }),
+  })
 };
 </script>
+
+<style>
+svg text {
+  font-family: "Roboto", sans-serif;
+}
+</style>
