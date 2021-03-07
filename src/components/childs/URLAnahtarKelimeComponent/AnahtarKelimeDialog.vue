@@ -60,25 +60,19 @@
         </v-col>
       </v-row>
       <v-row no-gutters>
-        <v-card-title>Benzerlik Oranı</v-card-title>
+        <v-card-title>Benzerlik Skoru</v-card-title>
 
         <v-card-subtitle
           >Eşleşen Toplam: {{ matchedKeywords.length }}</v-card-subtitle
         >
         <svg width="500" height="60">
-          <rect
-              width="400"
-              height="50"
-              x="50"
-              fill="#e0e0e0"
-              rx="4"
-          />
+          <rect width="400" height="50" x="50" fill="#e0e0e0" rx="4" />
           <rect
             id="svgBenzerlik"
             width="0"
             height="50"
             x="50"
-            fill="wheat"
+            fill="#fcba03"
             rx="4"
           />
           <text
@@ -88,7 +82,7 @@
             y="30"
             fill="black"
           >
-            %0
+            0
           </text>
         </svg>
       </v-row>
@@ -152,6 +146,7 @@ export default {
       const similarScore = similars
         .map(m => {
           const { count1, count2 } = m;
+          console.log("Map Points", this.mapPoints(count1, count2));
           return this.mapPoints(count1, count2);
         })
         .reduce((a, b) => a + b, 0);
@@ -160,21 +155,23 @@ export default {
         return a + b.count2;
       }, 0);
 
-      const totalScore =
-        (frequencyScore + similarScore) / this.sortedFrequency2.length;
+      console.log("Frequency Score", frequencyScore);
+      console.log("Similarity Score", similarScore);
+
+      const totalScore = frequencyScore + similarScore; // this.sortedFrequency2.length;
       const svgText = document.querySelector("#svgBenzerlikText");
-      svgText.innerHTML = `%${(totalScore * 10).toFixed(0)}`
+      svgText.innerHTML = `${(totalScore > 100 ? 100 : totalScore).toFixed(0)}`;
       const svgRectangle = document.querySelector("#svgBenzerlik");
 
+      const svgWidth = (totalScore * 400) / 100;
       svgRectangle.setAttribute(
         "style",
-        `width:${(totalScore * 10 * 400) / 100}px; transition: 1s ease-in-out;`
+        `width:${
+          svgWidth > 400 ? 400 : svgWidth
+        }px; transition: 1.3s cubic-bezier(.15,.89,.41,.95);`
       );
 
-      console.log(
-        "Similar Total",
-        (frequencyScore + similarScore) / this.sortedFrequency2.length
-      );
+      console.log("Similar Total", totalScore);
     },
     mapPoints: function(p1, p2) {
       const minus = Math.abs(p1 - p2);
