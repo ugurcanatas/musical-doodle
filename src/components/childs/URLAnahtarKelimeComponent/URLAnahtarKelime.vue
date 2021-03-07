@@ -113,7 +113,7 @@ export default {
         "https://www.w3schools.com/",
         "https://www.washingtonpost.com/",
         "https://www.nytimes.com/",
-          "https://www.wsj.com/"
+        "https://www.wsj.com/"
       ],
       buttonDisabled: true,
       buttonLoading: false,

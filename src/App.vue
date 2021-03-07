@@ -27,6 +27,7 @@
 import TabWrapper from "@/components/TabWrapper";
 import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
 import URLAnahtarKelime from "@/components/childs/URLAnahtarKelimeComponent/URLAnahtarKelime";
+import SiteRankingComponent from "@/components/childs/SiteSıralama/SiteRankingComponent";
 
 export default {
   name: "App",
@@ -46,6 +47,11 @@ export default {
         label: "URL Anahtar Kelime/Etiket",
         component: URLAnahtarKelime,
         barColor: "#52abae"
+      },
+      {
+        label: "Site Sıralamaları",
+        component: SiteRankingComponent,
+        barColor: "#c19641"
       }
     ]
   })
