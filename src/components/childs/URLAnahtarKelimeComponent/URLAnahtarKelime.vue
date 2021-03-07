@@ -5,6 +5,8 @@
       :sorted-frequency2="sortedFrequency2"
       :dialog-model="showDialog"
       @anahtarDialogClosed="anahtarDialogClosed"
+      :url-name1="urlFieldModel1"
+      :url-name2="urlFieldModel2"
     />
     <v-card>
       <v-app-bar :color="componentItem.barColor" dense>
@@ -12,6 +14,9 @@
           componentItem.label
         }}</v-app-bar-title>
         <v-spacer></v-spacer>
+        <v-btn @click="$refs['tag-form'].reset()" color="white" medium fab icon
+          ><v-icon>mdi-delete</v-icon></v-btn
+        >
         <v-btn
           @click="request"
           color="white"
@@ -105,7 +110,10 @@ export default {
         "https://en.m.wikipedia.org/wiki/Riegelmann_Boardwalk",
         "https://rawtext.club/",
         "https://lite.poandpo.com/",
-        "https://www.w3schools.com/"
+        "https://www.w3schools.com/",
+        "https://www.washingtonpost.com/",
+        "https://www.nytimes.com/",
+          "https://www.wsj.com/"
       ],
       buttonDisabled: true,
       buttonLoading: false,
@@ -214,14 +222,12 @@ export default {
         .filter(m => m.length !== 0);
       console.log("Tags Second", eachWordSecond);
 
-      const freq1 = reducerFrequency(eachWordFirst);
-      const freq2 = reducerFrequency(eachWordSecond);
+      this.sortedFrequency1 = reducerFrequency(eachWordFirst);
+      this.sortedFrequency2 = reducerFrequency(eachWordSecond);
 
-      this.sortedFrequency1 = freq1.slice(0, 5);
-      this.sortedFrequency2 = freq2.slice(0, 5);
       this.buttonDisabled = false;
-      console.log("Frequency 1", freq1.slice(0, 5));
-      console.log("Frequency 2", freq2.slice(0, 5));
+      console.log("Frequency 1", this.sortedFrequency1);
+      console.log("Frequency 2", this.sortedFrequency2);
     },
     anahtarDialogClosed: function() {
       this.showDialog = false;
