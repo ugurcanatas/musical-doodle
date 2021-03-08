@@ -52,7 +52,8 @@ export default {
         label: "Site Sıralamaları",
         component: SiteRankingComponent,
         barColor: "#c19641"
-      }
+      },
+        
     ]
   })
 };

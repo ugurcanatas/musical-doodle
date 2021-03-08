@@ -1,73 +1,77 @@
 <template>
   <div>
-    <site-ranking-dialog @rankingDialogClosed="showDialog = false" :dialog-model="showDialog" :treeview="treeView"
-                         :url-name="urlFieldModel" />
-  <v-card>
-    <v-app-bar :color="componentItem.barColor" dense>
-      <v-app-bar-title class="white--text">{{
-        componentItem.label
-      }}</v-app-bar-title>
-      <v-spacer></v-spacer>
-      <v-btn @click="visitWebsite" color="white" medium fab icon
-        ><v-icon>mdi-web</v-icon></v-btn
-      >
-      <v-btn
-        @click="request"
-        color="white"
-        medium
-        fab
-        icon
-        :loading="buttonLoading"
-        :disabled="buttonLoading"
-        ><v-icon>mdi-download</v-icon></v-btn
-      >
-      <v-btn
-        @click="showDialog = true"
-        color="white"
-        medium
-        fab
-        icon
-        :disabled="buttonDisabled"
-        ><v-icon>mdi-eye</v-icon></v-btn
-      >
-    </v-app-bar>
-    <v-card-text>
-      <v-form ref="ranking-form">
-        <v-combobox
-          v-model="urlFieldModel"
-          label="Url giriniz"
-          :rules="getDefaultRule"
-          :items="defaultComboItems"
-        />
-      </v-form>
-    </v-card-text>
-    <v-col class="col-12">
-      <span class="mb-0"
-        >Filtreler: (Sayfa içerisindeki linkleri anchor etiketine bakarak
-        bulabiliriz.)</span
-      >
-      <v-chip-group v-model="chipModel" :multiple="false" show-arrows>
-        <v-chip v-for="(chip, i) in chips" :key="i" filter outlined>
-          {{ chip }}
-        </v-chip>
-      </v-chip-group>
-    </v-col>
-    <v-col class="col-12">
-      <span class="mb-0">Derinlik Seçimi</span>
-      <v-radio-group v-model="derinlikModel" row>
-        <v-radio label="1" value="1"></v-radio>
-        <v-radio label="2" value="2"></v-radio>
-        <v-radio label="3" value="3"></v-radio>
-      </v-radio-group>
-    </v-col>
-  </v-card>
+    <site-ranking-dialog
+      @rankingDialogClosed="showDialog = false"
+      :dialog-model="showDialog"
+      :treeview="treeView"
+      :url-name="urlFieldModel"
+    />
+    <v-card>
+      <v-app-bar :color="componentItem.barColor" dense>
+        <v-app-bar-title class="white--text">{{
+          componentItem.label
+        }}</v-app-bar-title>
+        <v-spacer></v-spacer>
+        <v-btn @click="visitWebsite" color="white" medium fab icon
+          ><v-icon>mdi-web</v-icon></v-btn
+        >
+        <v-btn
+          @click="request"
+          color="white"
+          medium
+          fab
+          icon
+          :loading="buttonLoading"
+          :disabled="buttonLoading"
+          ><v-icon>mdi-download</v-icon></v-btn
+        >
+        <v-btn
+          @click="showDialog = true"
+          color="white"
+          medium
+          fab
+          icon
+          :disabled="buttonDisabled"
+          ><v-icon>mdi-eye</v-icon></v-btn
+        >
+      </v-app-bar>
+      <v-card-text>
+        <v-form ref="ranking-form">
+          <v-combobox
+            v-model="urlFieldModel"
+            label="Url giriniz"
+            :rules="getDefaultRule"
+            :items="defaultComboItems"
+          />
+        </v-form>
+      </v-card-text>
+      <v-col class="col-12">
+        <span class="mb-0"
+          >Filtreler: (Sayfa içerisindeki linkleri <b>anchor</b> etiketine ya da
+          <b>sitemap.xml</b> dosyasına bakarak bulabiliriz.)</span
+        >
+        <v-chip-group v-model="chipModel" :multiple="false" show-arrows>
+          <v-chip v-for="(chip, i) in chips" :key="i" filter outlined>
+            {{ chip }}
+          </v-chip>
+        </v-chip-group>
+      </v-col>
+      <v-col class="col-12">
+        <span class="mb-0">Derinlik Seçimi</span>
+        <v-radio-group v-model="derinlikModel" row>
+          <v-radio label="1" value="1"></v-radio>
+          <v-radio label="2" value="2"></v-radio>
+          <v-radio label="3" value="3"></v-radio>
+        </v-radio-group>
+      </v-col>
+    </v-card>
   </div>
 </template>
 
 <script>
 import SiteRankingDialog from "@/components/childs/SiteSıralama/SiteRankingDialog";
 import { v4 as uuidv4 } from "uuid";
-import { defaultRule } from "@/components/utils";
+import { defaultRule, convertUrlsToTreeViews } from "@/components/utils";
 import axios from "axios";
 
 export default {
@@ -97,7 +101,9 @@ export default {
       buttonDisabled: true,
       showDialog: false,
       treeView: [],
-      treeSelection: []
+      depthURLS: [],
+      treeSelection: [],
+      urlSet: []
     };
   },
   computed: {
@@ -133,6 +139,10 @@ export default {
           console.log("Error ", e);
         });
     },
+    /*
+     * Return url concat.
+     * determined by which filter is selected.
+     * */
     getDynamicURL: function() {
       switch (this.chipModel) {
         case 0:
@@ -145,6 +155,11 @@ export default {
           return this.urlFieldModel;
       }
     },
+    /*
+     * Searching for anchor tags & sitemaps are different.
+     * This function gets the response and converts the data to same format
+     * for both anchors and sitemaps.
+     * */
     createHTML: function(data) {
       const selectors = this.chips[this.chipModel];
       let sitemap = [];
@@ -155,16 +170,42 @@ export default {
         const newDomHtml = new DOMParser().parseFromString(data, "text/xml");
         console.log("New DOM", newDomHtml);
         sitemap = [...newDomHtml.querySelectorAll(selectors)];
-        this.siteMapOrUrl(sitemap);
+        //this.siteMapOrUrl(sitemap);
+        this.urlSet = sitemap.map(s => {
+          //console.log("Sitemap S", s);
+          return {
+            url: s
+              .getElementsByTagName("loc")[0]
+              .textContent.slice(this.urlFieldModel.length - 1)
+          };
+        });
+        console.log("Site Maps URL Set ", this.urlSet);
       } else if (this.chipModel === 2) {
         const newDomHtml = new DOMParser().parseFromString(data, "text/html");
         console.log("New DOM", newDomHtml);
         sitemap = [...newDomHtml.getElementsByTagName(selectors)];
-        console.log("Anchor tags ", sitemap);
-        this.anchorTags(sitemap);
+        this.urlSet = sitemap
+          .filter(
+            m =>
+              !m.getAttribute("href").includes("#") &&
+              m.getAttribute("href") !== "/" &&
+              m.getAttribute("href").includes(this.urlFieldModel)
+          )
+          .map(m => {
+            return {
+              url: m.getAttribute("href").slice(this.urlFieldModel.length - 1)
+            };
+          });
+        console.log("Anchor URL SET ", this.urlSet);
+        //this.anchorTags(sitemap);
       }
 
       this.buttonDisabled = false;
+      this.treeView = convertUrlsToTreeViews(
+        this.urlSet,
+        Number(this.derinlikModel),
+        this.urlFieldModel
+      );
     },
     anchorTags: function(tags) {
       const hrefSet = tags
@@ -216,12 +257,13 @@ export default {
       const depthSearch = urls.filter(
         m => (m.url.match(/[/]/g) || []).length === Number(this.derinlikModel)
       );
+      this.depthURLS = depthSearch;
       console.log("DEPTH", depthSearch);
       let treeview = {};
       depthSearch.forEach(m => {
         let depth1 = m.url.slice(
           m.url.indexOf("/"),
-          m.url.indexOf("/", m.url.indexOf("/") + 1)
+          m.url.indexOf("/", m.url.indexOf("/"))
         );
         let depth2 = m.url.slice(
           m.url.indexOf("/", m.url.indexOf("/") + 1),
