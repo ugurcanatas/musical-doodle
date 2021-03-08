@@ -5,6 +5,9 @@
         componentItem.label
       }}</v-app-bar-title>
       <v-spacer></v-spacer>
+      <v-btn @click="visitWebsite" color="white" medium fab icon
+        ><v-icon>mdi-web</v-icon></v-btn
+      >
       <v-btn
         @click="request"
         color="white"
@@ -40,7 +43,7 @@
         >Filtreler: (Sayfa içerisindeki linkleri anchor etiketine bakarak
         bulabiliriz.)</span
       >
-      <v-chip-group v-model="chipModel" multiple show-arrows>
+      <v-chip-group v-model="chipModel" :multiple="false" show-arrows>
         <v-chip v-for="(chip, i) in chips" :key="i" filter outlined>
           {{ chip }}
         </v-chip>
@@ -54,11 +57,30 @@
         <v-radio label="3" value="3"></v-radio>
       </v-radio-group>
     </v-col>
+    <v-col>
+      <v-treeview
+        selection-type="leaf"
+        return-object
+        :items="treeView"
+        item-key="key"
+        open-on-click
+      >
+        <template v-slot:prepend="{ item, open }">
+          <v-icon v-if="!item.file">
+            {{ open ? "mdi-folder-open" : "mdi-folder" }}
+          </v-icon>
+          <v-icon v-else>
+            {{ files[item.file] }}
+          </v-icon>
+        </template>
+      </v-treeview>
+    </v-col>
   </v-card>
 </template>
 
 <script>
 //import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import { defaultRule } from "@/components/utils";
 import axios from "axios";
 
@@ -83,12 +105,22 @@ export default {
       chips: ["url", "sitemap", "a"],
       derinlikModel: "1",
       buttonLoading: false,
-      buttonDisabled: true
+      buttonDisabled: true,
+      treeView: [],
+      treeSelection: []
     };
   },
   computed: {
     getDefaultRule: function() {
       return defaultRule;
+    }
+  },
+  watch: {
+    treeSelection: {
+      deep: true,
+      handler(v) {
+        console.log("Deep Watch", v);
+      }
     }
   },
   methods: {
@@ -100,7 +132,7 @@ export default {
       console.log("Model", this.urlFieldModel);
       axios
         .post("http://localhost:3000/urltest", {
-          url: `${this.urlFieldModel}sitemap.xml`
+          url: this.getDynamicURL()
         })
         .then(res => {
           console.log("Response Axios", res);
@@ -111,14 +143,76 @@ export default {
           console.log("Error ", e);
         });
     },
+    getDynamicURL: function() {
+      switch (this.chipModel) {
+        case 0:
+          return `${this.urlFieldModel}sitemap.xml`;
+        case 1:
+          return `${this.urlFieldModel}sitemap.xml`;
+        case 2:
+          return this.urlFieldModel;
+        default:
+          return this.urlFieldModel;
+      }
+    },
     createHTML: function(data) {
-      const selectors = this.chipModel.map(v => this.chips[v]).join(",");
-      const newDomHtml = new DOMParser().parseFromString(data, "text/xml");
-      console.log("New DOM", newDomHtml);
-      const sitemap = [...newDomHtml.querySelectorAll(selectors)];
+      const selectors = this.chips[this.chipModel];
+      let sitemap = [];
       console.log("Pler", sitemap);
       //get the urlModel to substring
 
+      if (this.chipModel === 0 || this.chipModel === 1) {
+        const newDomHtml = new DOMParser().parseFromString(data, "text/xml");
+        console.log("New DOM", newDomHtml);
+        sitemap = [...newDomHtml.querySelector(selectors)];
+        this.siteMapOrUrl(sitemap);
+      } else if (this.chipModel === 2) {
+        const newDomHtml = new DOMParser().parseFromString(data, "text/html");
+        console.log("New DOM", newDomHtml);
+        sitemap = [...newDomHtml.getElementsByTagName(selectors)];
+        console.log("Anchor tags ", sitemap);
+        this.anchorTags(sitemap);
+      }
+    },
+    anchorTags: function(tags) {
+      const hrefSet = tags
+        .filter(m => !m.getAttribute("href").includes("#"))
+        .map(m => {
+          return {
+            url: m.getAttribute("href")
+          };
+        });
+      console.log("URLS", hrefSet);
+      const urls = hrefSet
+        .filter(s => s.url !== this.urlFieldModel)
+        .map(m => {
+          return {
+            url: m.url
+              .slice(this.urlFieldModel.length - 1)
+              .split("/")
+              .filter(m => m !== "")
+          };
+        })
+        .filter(x => x.url.length === Number(this.derinlikModel))
+        /*.map(m => {
+          if (this.derinlikModel === "1") {
+            return {
+              name: m.url[0],
+              key: uuidv4()
+            };
+          } else if (this.derinlikModel === "2" || this.derinlikModel === "3") {
+            return {
+              name: m.url[0],
+              key: uuidv4(),
+              children: this.convertToArrayOfObjects(m.url.slice(1))
+            };
+          }
+        });
+      console.log("URLS MAPPED DEPTH" + this.derinlikModel, { ...urls });
+      this.treeView = urls;*/
+      console.log("URLS", urls);
+    },
+    siteMapOrUrl: function(sitemap) {
       const urls = sitemap.map(s => {
         //console.log("Sitemap S", s);
         return {
@@ -132,7 +226,6 @@ export default {
         m => (m.url.match(/[/]/g) || []).length === Number(this.derinlikModel)
       );
       console.log("DEPTH", depthSearch);
-
       let treeview = {};
       depthSearch.forEach(m => {
         let depth1 = m.url.slice(
@@ -152,16 +245,27 @@ export default {
         }
       });
 
+      this.treeView = Object.keys(treeview).map(key => {
+        return {
+          name: key,
+          key: uuidv4(),
+          children: this.convertToArrayOfObjects(treeview[key])
+        };
+      });
+
       console.log("TREEVIEW", treeview);
-      /*eslint-disable*/
-      const sample = {
-        news: [
-          { types: ["url"] },
-          { business: ["url", "url"] },
-          { tech: ["url", "url"] }
-        ],
-        graphics: [{ econsurvey: ["url"] }]
-      };
+      console.log("TREEVIEW MAPPED", this.treeView);
+    },
+    convertToArrayOfObjects: function(array) {
+      return array.map(m => {
+        return {
+          name: m,
+          key: uuidv4()
+        };
+      });
+    },
+    visitWebsite: function() {
+      console.log("Tree Model", this.treeSelection);
     }
   }
 };
