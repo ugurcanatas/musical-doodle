@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 
 export const defaultRule = [v => !!v || "URL Girmelisiniz"];
 
+export const keywordRegex = /[()-,\n?!,*'":;]/g;
+
 export const reducerFrequency = data => {
   const obj = data.reduce((p, c) => {
     p[c] = (p[c] || 0) + 1;

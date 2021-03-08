@@ -61,7 +61,8 @@
 </template>
 
 <script>
-import { defaultRule } from "@/components/utils";
+import { defaultRule, keywordRegex } from "@/components/utils";
+import axios from "axios";
 
 export default {
   name: "SemantikAnalizComponent",
@@ -98,6 +99,65 @@ export default {
         return;
       }
       console.log("Semantic");
+      this.buttonLoading = true;
+      if (process.env.NODE_ENV === "development") {
+        axios
+          .post(process.env.VUE_APP_DEV_URL, {
+            url: this.urlFieldModel
+          })
+          .then(response => {
+            console.log("RESPONSE DATA", response.data);
+            this.parser(response.data);
+            this.buttonLoading = false;
+          })
+          .catch(e => {
+            console.log("Error", e);
+          });
+      } else {
+        axios
+          .get(this.urlFieldModel)
+          .then(response => {
+            console.log("RESPONSE DATA", response.data);
+            this.parser(response.data);
+            this.buttonLoading = false;
+          })
+          .catch(e => {
+            console.log("Error", e);
+          });
+      }
+    },
+    parser: function(v) {
+      const selectors = this.chipModel.map(v => this.chips[v]).join(",");
+      const html1 = new DOMParser().parseFromString(v, "text/html");
+      const firstElements = [...html1.querySelectorAll(selectors)];
+
+      const tags = firstElements
+        .filter(tag => {
+          if (tag.hasAttribute("name")) {
+            console.log("HAS NAME", tag);
+            const name = tag.getAttribute("name");
+            console.log("NAME", name);
+            if (
+              name.includes("title") ||
+              name.includes("description") ||
+              name.includes("Description") ||
+              name.includes("keywords") ||
+              name.includes("Keywords")
+            ) {
+              console.log("CONTENT ATTR", tag.getAttribute("content"));
+              return tag;
+            }
+          }
+        })
+        .map(m => m.getAttribute("content"));
+      console.log("Tags First", tags);
+
+      const eachKeyword = tags
+        .join("")
+        .replace(keywordRegex, " ")
+        .split(" ")
+        .filter(m => m.length !== 0);
+      console.log("Each Keyword", eachKeyword);
     }
   }
 };

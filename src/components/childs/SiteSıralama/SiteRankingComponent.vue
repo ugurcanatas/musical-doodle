@@ -94,7 +94,7 @@ export default {
         "https://www.wsj.com/",
         "https://github.com/"
       ],
-      chipModel: [0],
+      chipModel: [],
       chips: ["url", "sitemap", "a"],
       derinlikModel: "1",
       buttonLoading: false,
