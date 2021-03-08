@@ -164,7 +164,7 @@ export default {
       if (this.chipModel === 0 || this.chipModel === 1) {
         const newDomHtml = new DOMParser().parseFromString(data, "text/xml");
         console.log("New DOM", newDomHtml);
-        sitemap = [...newDomHtml.querySelector(selectors)];
+        sitemap = [...newDomHtml.querySelectorAll(selectors)];
         this.siteMapOrUrl(sitemap);
       } else if (this.chipModel === 2) {
         const newDomHtml = new DOMParser().parseFromString(data, "text/html");
@@ -182,7 +182,7 @@ export default {
             url: m.getAttribute("href")
           };
         });
-      console.log("URLS", hrefSet);
+      //console.log("URLS", hrefSet);
       const urls = hrefSet
         .filter(s => s.url !== this.urlFieldModel)
         .map(m => {
@@ -194,7 +194,7 @@ export default {
           };
         })
         .filter(x => x.url.length === Number(this.derinlikModel))
-        /*.map(m => {
+        .map(m => {
           if (this.derinlikModel === "1") {
             return {
               name: m.url[0],
@@ -208,9 +208,8 @@ export default {
             };
           }
         });
-      console.log("URLS MAPPED DEPTH" + this.derinlikModel, { ...urls });
-      this.treeView = urls;*/
-      console.log("URLS", urls);
+      console.log("URLS MAPPED DEPTH" + this.derinlikModel, urls);
+      this.treeView = urls;
     },
     siteMapOrUrl: function(sitemap) {
       const urls = sitemap.map(s => {
@@ -249,7 +248,10 @@ export default {
         return {
           name: key,
           key: uuidv4(),
-          children: this.convertToArrayOfObjects(treeview[key])
+          children:
+            this.derinlikModel === "1"
+              ? []
+              : this.convertToArrayOfObjects(treeview[key])
         };
       });
 
