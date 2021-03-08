@@ -111,14 +111,6 @@ export default {
       return defaultRule;
     }
   },
-  watch: {
-    treeSelection: {
-      deep: true,
-      handler(v) {
-        console.log("Deep Watch", v);
-      }
-    }
-  },
   methods: {
     request: function() {
       if (!this.$refs["ranking-form"].validate()) {

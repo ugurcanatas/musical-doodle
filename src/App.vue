@@ -28,6 +28,7 @@ import TabWrapper from "@/components/TabWrapper";
 import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
 import URLAnahtarKelime from "@/components/childs/URLAnahtarKelimeComponent/URLAnahtarKelime";
 import SiteRankingComponent from "@/components/childs/SiteSıralama/SiteRankingComponent";
+import SemantikAnalizComponent from "@/components/childs/SemantikAnaliz/SemantikAnalizComponent";
 
 export default {
   name: "App",
@@ -53,7 +54,11 @@ export default {
         component: SiteRankingComponent,
         barColor: "#c19641"
       },
-        
+      {
+        label: "Semantik Analiz Denemesi",
+        component: SemantikAnalizComponent,
+        barColor: "#a548e7"
+      }
     ]
   })
 };
