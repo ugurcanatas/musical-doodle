@@ -115,7 +115,12 @@ export default {
           });
       } else {
         axios
-          .get(this.urlFieldModel)
+          .get(this.urlFieldModel, {
+            headers: {
+              "Access-Control-Allow-Origin":
+                "https://musical-doodle.vercel.app/"
+            }
+          })
           .then(response => {
             console.log("RESPONSE DATA", response.data);
             this.parser(response.data);
