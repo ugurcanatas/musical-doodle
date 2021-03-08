@@ -1,4 +1,7 @@
 <template>
+  <div>
+    <site-ranking-dialog @rankingDialogClosed="showDialog = false" :dialog-model="showDialog" :treeview="treeView"
+                         :url-name="urlFieldModel" />
   <v-card>
     <v-app-bar :color="componentItem.barColor" dense>
       <v-app-bar-title class="white--text">{{
@@ -57,35 +60,21 @@
         <v-radio label="3" value="3"></v-radio>
       </v-radio-group>
     </v-col>
-    <v-col>
-      <v-treeview
-        selection-type="leaf"
-        return-object
-        :items="treeView"
-        item-key="key"
-        open-on-click
-      >
-        <template v-slot:prepend="{ item, open }">
-          <v-icon v-if="!item.file">
-            {{ open ? "mdi-folder-open" : "mdi-folder" }}
-          </v-icon>
-          <v-icon v-else>
-            {{ files[item.file] }}
-          </v-icon>
-        </template>
-      </v-treeview>
-    </v-col>
   </v-card>
+  </div>
 </template>
 
 <script>
-//import axios from "axios";
+import SiteRankingDialog from "@/components/childs/SiteSıralama/SiteRankingDialog";
 import { v4 as uuidv4 } from "uuid";
 import { defaultRule } from "@/components/utils";
 import axios from "axios";
 
 export default {
   name: "SiteRankingComponent",
+  components: {
+    SiteRankingDialog
+  },
   props: {
     componentItem: {
       required: false,
@@ -106,6 +95,7 @@ export default {
       derinlikModel: "1",
       buttonLoading: false,
       buttonDisabled: true,
+      showDialog: false,
       treeView: [],
       treeSelection: []
     };
@@ -173,6 +163,8 @@ export default {
         console.log("Anchor tags ", sitemap);
         this.anchorTags(sitemap);
       }
+
+      this.buttonDisabled = false;
     },
     anchorTags: function(tags) {
       const hrefSet = tags
