@@ -115,7 +115,18 @@ export default {
           });
       } else {
         axios
-          .post("https://studious-system.vercel.app/urltest", {
+          .get(this.urlFieldModel)
+          .then(response => {
+            console.log("RESPONSE DATA", response.data);
+            this.parser(response.data);
+            this.buttonLoading = false;
+          })
+          .catch(e => {
+            console.log("Error", e);
+          });
+
+        axios
+          .post("/urltest", {
             url: this.urlFieldModel
           })
           .then(response => {
