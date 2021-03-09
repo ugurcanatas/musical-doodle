@@ -34,6 +34,7 @@
       <v-row no-gutters>
         <v-col class="col-12 pa-6">
           <router-view :key="$route.path" />
+          <v-btn @click="testRequest">Test</v-btn>
         </v-col>
       </v-row>
     </v-main>
@@ -41,6 +42,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
 import URLAnahtarKelime from "@/components/childs/URLAnahtarKelimeComponent/URLAnahtarKelime";
 import SiteRankingComponent from "@/components/childs/SiteSıralama/SiteRankingComponent";
@@ -77,7 +79,16 @@ export default {
         barColor: "#a548e7"
       }
     ]
-  })
+  }),
+  methods: {
+    testRequest: function () {
+      axios.get('/api/urltest').then(res => {
+        console.log("Response", res);
+      }).catch(e => {
+        console.log("Error", e);
+      })
+    }
+  }
 };
 </script>
 
