@@ -118,7 +118,10 @@ export default {
           .get(this.urlFieldModel, {
             headers: {
               "Access-Control-Allow-Origin":
-                "https://musical-doodle.vercel.app/"
+                "https://musical-doodle.vercel.app/",
+              "Access-Control-Allow-Methods": "GET,PUT,OPTIONS",
+              "Access-Control-Allow-Headers":
+                "Access-Control-Allow-Origin, Content-Type, Accept, Accept-Language, Origin, User-Agent"
             }
           })
           .then(response => {
