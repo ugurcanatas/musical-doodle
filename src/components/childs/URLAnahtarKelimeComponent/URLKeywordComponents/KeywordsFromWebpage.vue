@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import AnahtarKelimeDialog from "@/components/childs/URLAnahtarKelimeComponent/AnahtarKelimeDialog";
+import AnahtarKelimeDialog from "@/components/childs/URLAnahtarKelimeComponent/URLKeywordDialogs/AnahtarKelimeDialog";
 import axios from "axios";
 import { defaultRule, reducerFrequency } from "@/components/utils";
 
