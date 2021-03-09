@@ -82,7 +82,19 @@ export default {
   }),
   methods: {
     testRequest: function () {
+      axios.get('http://localhost:8082/api/urltest').then(res => {
+        console.log("Response", res);
+      }).catch(e => {
+        console.log("Error", e);
+      })
+
       axios.get('/api/urltest').then(res => {
+        console.log("Response", res);
+      }).catch(e => {
+        console.log("Error", e);
+      })
+
+      axios.get('/urltest').then(res => {
         console.log("Response", res);
       }).catch(e => {
         console.log("Error", e);
