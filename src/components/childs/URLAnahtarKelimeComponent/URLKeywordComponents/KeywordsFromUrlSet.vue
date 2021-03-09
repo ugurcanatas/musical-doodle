@@ -1,6 +1,7 @@
 <template>
   <div>
     <u-r-l-keyword-dialog
+      v-if="showDialog"
       :dialog-model="showDialog"
       :sorted-frequency1="sortedFrequency1"
       :sorted-frequency2="sortedFrequency2"
