@@ -21,9 +21,13 @@ const routes = [
   {
     path: "/url_keywords",
     props: {
-      componentItem: {
-        label: "URL Anahtar Kelime/Etiket",
+      componentItem1: {
+        label: "Webpage Keywords",
         barColor: "#52abae"
+      },
+      componentItem2: {
+        label: "URL Keywords",
+        barColor: "#5552ae"
       }
     },
     component: URLAnahtarKelime
