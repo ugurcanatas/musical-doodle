@@ -1,10 +1,20 @@
 <template>
   <v-card>
-    <v-app-bar :color="componentItem.barColor" dense>
+    <v-app-bar :color="componentItem.barColor">
       <v-app-bar-title class="white--text">{{
         componentItem.label
       }}</v-app-bar-title>
       <v-spacer></v-spacer>
+      <v-select
+        label="Sözlük seçiniz"
+        v-model="dictModel"
+        :items="dictionaries"
+        item-text="name"
+        item-value="url"
+        hide-details
+        dense
+        dark
+      />
       <v-btn
         @click="request"
         color="white"
@@ -28,10 +38,11 @@
     <v-card-text>
       <v-form ref="semantic-form">
         <v-combobox
+          multiple
           v-model="urlFieldModel"
           label="Url giriniz"
           :rules="getDefaultRule"
-          :items="defaultComboItems"
+          :items="getUrlSet"
         />
       </v-form>
     </v-card-text>
@@ -56,12 +67,18 @@
           {{ chip }}
         </v-chip>
       </v-chip-group>
+      <p>{{ resolvedData }}</p>
     </v-col>
   </v-card>
 </template>
 
 <script>
-import { defaultRule, keywordRegex } from "@/components/utils";
+import {
+  defaultRule,
+  keywordRegex,
+  urlSet,
+  returnURLWithFrequencyList
+} from "@/components/utils";
 import axios from "axios";
 
 export default {
@@ -75,22 +92,31 @@ export default {
   data() {
     return {
       urlFieldModel: "",
-      defaultComboItems: [
-        "https://www.washingtonpost.com/",
-        "https://www.nytimes.com/",
-        "https://www.wsj.com/",
-        "https://github.com/"
-      ],
       chipModel: [0],
       chips: ["meta", "title"],
       buttonLoading: false,
       buttonDisabled: true,
-      showDialog: false
+      showDialog: false,
+      resolvedData: [],
+      dictModel: "https://www.thesaurus.com/browse/",
+      dictionaries: [
+        {
+          name: "Türkçe sözlük",
+          url: "https://es-anlam.com/kelime/"
+        },
+        {
+          name: "İngilizce sözlük",
+          url: "https://www.thesaurus.com/browse/"
+        }
+      ]
     };
   },
   computed: {
     getDefaultRule: function() {
       return defaultRule;
+    },
+    getUrlSet: function() {
+      return urlSet;
     }
   },
   methods: {
@@ -99,7 +125,7 @@ export default {
         return;
       }
       console.log("Semantic");
-      this.buttonLoading = true;
+      /*      this.buttonLoading = true;
       axios
         .post(
           process.env.NODE_ENV === "development"
@@ -116,7 +142,8 @@ export default {
         })
         .catch(e => {
           console.log("Error", e);
-        });
+        });*/
+      this.urlParser();
     },
     parser: function(v) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
@@ -150,6 +177,69 @@ export default {
         .split(" ")
         .filter(m => m.length !== 0);
       console.log("Each Keyword", eachKeyword);
+    },
+    urlParser: async function() {
+      console.log("Selected Fields", this.urlFieldModel);
+
+      const freqList = returnURLWithFrequencyList(this.urlFieldModel);
+      //const axiosRequests = [];
+      console.log("Freq List", freqList);
+      const freqListUpdated = freqList.map(m => {
+        const { frequencyList } = m;
+        return {
+          ...m,
+          frequencyList: frequencyList.map(v => {
+            const { text } = v;
+            return {
+              ...v,
+              request: axios.post(
+                process.env.NODE_ENV === "development"
+                  ? process.env.VUE_APP_DEV_URL
+                  : process.env.VUE_APP_PROD_URL,
+                {
+                  url: `https://www.thesaurus.com/browse/${text}`
+                }
+              )
+            };
+          })
+        };
+      });
+
+      const returnV = await Promise.all(
+        freqListUpdated.map(async item => {
+          console.log("PROMISE ALL ITEM", item);
+          const obj = item;
+          const value = await Promise.all(
+            obj.frequencyList.map(async i => {
+              const request = await i.request;
+              return {
+                ...i,
+                request: this.getWordsFromData(request["data"])
+              };
+            })
+          ).catch(e => {
+            console.log("ERROR received", e);
+          });
+          console.log("VALUE RES", value);
+          return { ...obj, frequencyList: value };
+        })
+      ).catch(e => {
+        console.log("ERROR MAIN", e);
+      });
+
+      console.log("RETURN V", returnV);
+      this.resolvedData = returnV;
+      console.log("Requests", this.resolvedData);
+    },
+    getWordsFromData: function(data) {
+      const newDomHtml = new DOMParser().parseFromString(data, "text/html");
+      const selected = [
+        ...newDomHtml.querySelectorAll(
+          "#meanings > div.css-i3pbo.e1i572590 > ul"
+        )
+      ];
+      console.log("Selected XPath", selected);
+      return selected[0]["outerText"];
     }
   }
 };
