@@ -7,11 +7,17 @@ export const defaultRule = [v => !!v || "URL Girmelisiniz"];
 
 export const keywordRegex = /[()-,\n?!,*_'":;-]/g;
 
+export const whichURL =
+  process.env.NODE_ENV === "development"
+    ? process.env.VUE_APP_DEV_URL
+    : process.env.VUE_APP_PROD_URL;
+
 /*
  * URL Array that we use in combobox fields
  * */
 export const urlSet = [
   "https://reactnavigation.org/docs/headers/",
+  "https://reactnavigation.org/docs/drawer-navigator/",
   "https://www.wsj.com/articles/cdc-says-fully-vaccinated-people-can-gather-in-small-groups-without-masks-11615219222?mod=politics_lead_pos4",
   "https://www.wsj.com/articles/supreme-court-wont-review-banks-bid-to-arbitrate-stale-debts-11615242719",
   "https://www.wsj.com/articles/plastics-recycler-carbonlite-files-for-bankruptcy-11615226888",

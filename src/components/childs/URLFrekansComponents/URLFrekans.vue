@@ -1,5 +1,11 @@
 <template>
   <div>
+    <v-snackbar
+        v-model="snackbar"
+        :color="snack_color"
+    >
+      {{ snack_text }}
+    </v-snackbar>
     <u-r-l-frekans-dialog
       :sorted-frequency="sortedFrequency"
       :dialog-model="showDialog"
@@ -37,7 +43,7 @@
             v-model="urlFieldModel"
             label="Url giriniz"
             :rules="getDefaultRule"
-            :items="defaultComboItems"
+            :items="getUrlSet"
           />
         </v-form>
       </v-card-text>
@@ -58,7 +64,12 @@
 <script>
 import URLFrekansDialog from "@/components/childs/URLFrekansComponents/URLFrekansDialog";
 import axios from "axios";
-import { defaultRule, reducerFrequency } from "@/components/utils";
+import {
+  defaultRule,
+  reducerFrequency,
+  urlSet,
+  whichURL
+} from "@/components/utils";
 
 export default {
   name: "URLFrekans",
@@ -75,13 +86,6 @@ export default {
     return {
       urlFieldModel: "",
       formValid: false,
-      defaultComboItems: [
-        "https://loremipsum.io/",
-        "https://lite.cnn.com/en",
-        "https://en.m.wikipedia.org/wiki/Riegelmann_Boardwalk",
-        "https://rawtext.club/",
-        "https://lite.poandpo.com/"
-      ],
       chipModel: [0],
       chips: ["p", "h1", "h2", "h3", "h4", "h5", "blockquote"],
       htmlData: "",
@@ -91,34 +95,52 @@ export default {
       dialog: false,
       showDialog: false,
       sortedFrequency: [],
-      buttonDisabled: true
+      buttonDisabled: true,
+      snack_text: '',
+      snackbar: false,
+      snack_color: 'error'
     };
   },
   computed: {
     getDefaultRule: function() {
       return defaultRule;
+    },
+    getUrlSet: function() {
+      return urlSet;
     }
   },
   methods: {
     request: function() {
-      if (!this.$refs["url-form"].validate()) {
+      if (!this.$refs["url-form"].validate() || this.chipModel.length === 0) {
+        this.snackbar = true;
+        this.snack_text = "İstek yapabilmek için form dolu olmalı ve en az bir filtre seçilmelidir."
         return;
       }
       this.buttonLoading = true;
       console.log("Model", this.urlFieldModel);
       axios
-        .post("http://localhost:3000/urltest", {
+        .post(whichURL, {
           url: this.urlFieldModel
         })
         .then(res => {
           console.log("Response Axios", res);
           this.buttonLoading = false;
+          this.snackbar = true;
+          this.snack_text = 'Başarılı'
+          this.snack_color = 'success';
           this.createTexts(res.data);
         })
         .catch(e => {
           console.log("Error ", e);
+          this.buttonLoading = false;
+          this.snackbar = true;
+          this.snack_text = 'Bir hata oluştu'
+          this.snack_color = 'error';
         });
     },
+    /**
+     * @param data : String
+     * */
     createTexts: function(data) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
       console.log("FİLTERS", selectors);

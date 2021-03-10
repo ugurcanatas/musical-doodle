@@ -5,16 +5,31 @@
         componentItem.label
       }}</v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-select
-        label="Sözlük seçiniz"
-        v-model="dictModel"
-        :items="dictionaries"
-        item-text="name"
-        item-value="url"
-        hide-details
-        dense
-        dark
-      />
+      <v-row class="no-gutters">
+        <span class="white--text">URL Karşılaştır</span>
+        <v-switch
+          v-model="compareMode"
+          true-value="page"
+          false-value="url"
+          hide-details
+          class="align-center ml-4"
+          color="white"
+          inset
+        />
+        <span class="white--text">Sayfa Karşılaştır</span>
+      </v-row>
+      <v-col class="col-2">
+        <v-autocomplete
+          label="Sözlük API seçiniz"
+          v-model="dictModel"
+          :items="dictionaries"
+          item-text="name"
+          item-value="url"
+          hide-details
+          dense
+          dark
+        />
+      </v-col>
       <v-btn
         @click="request"
         color="white"
@@ -37,13 +52,25 @@
     </v-app-bar>
     <v-card-text>
       <v-form ref="semantic-form">
-        <v-combobox
-          multiple
-          v-model="urlFieldModel"
-          label="Url giriniz"
-          :rules="getDefaultRule"
-          :items="getUrlSet"
-        />
+        <v-row no-gutters>
+          <v-col class="col-6 pr-2">
+            <v-combobox
+              v-model="urlFieldFix"
+              label="Karşılaştırma yapılacak URL"
+              :items="getUrlSet"
+              :rules="getDefaultRule"
+            />
+          </v-col>
+          <v-col class="col-6 pl-2">
+            <v-combobox
+              multiple
+              v-model="urlFieldModel"
+              label="Url Set"
+              :rules="getDefaultRule"
+              :items="getUrlSet"
+            />
+          </v-col>
+        </v-row>
       </v-form>
     </v-card-text>
     <v-col class="col-12">
@@ -54,7 +81,7 @@
           title etiketine bakarak bulabiliriz.)</span
         ></span
       >
-      <v-chip-group v-model="chipModel" multiple show-arrows>
+      <v-chip-group v-model="chipModel" :multiple="false" show-arrows>
         <v-chip
           class="lighten-2"
           text-color="white"
@@ -67,7 +94,14 @@
           {{ chip }}
         </v-chip>
       </v-chip-group>
-      <p>{{ resolvedData }}</p>
+      <v-row no-gutters>
+        <v-col class="col-6">
+          <p>{{ resolvedData }}</p>
+        </v-col>
+        <v-col class="col-6">
+          <p>{{ resolvedDataSet }}</p>
+        </v-col>
+      </v-row>
     </v-col>
   </v-card>
 </template>
@@ -77,6 +111,7 @@ import {
   defaultRule,
   keywordRegex,
   urlSet,
+  whichURL,
   returnURLWithFrequencyList
 } from "@/components/utils";
 import axios from "axios";
@@ -92,12 +127,14 @@ export default {
   data() {
     return {
       urlFieldModel: "",
+      urlFieldFix: "",
       chipModel: [0],
-      chips: ["meta", "title"],
+      chips: ["description", "title"],
       buttonLoading: false,
       buttonDisabled: true,
       showDialog: false,
       resolvedData: [],
+      resolvedDataSet: [],
       dictModel: "https://www.thesaurus.com/browse/",
       dictionaries: [
         {
@@ -108,7 +145,8 @@ export default {
           name: "İngilizce sözlük",
           url: "https://www.thesaurus.com/browse/"
         }
-      ]
+      ],
+      compareMode: "url"
     };
   },
   computed: {
@@ -125,27 +163,41 @@ export default {
         return;
       }
       console.log("Semantic");
-      /*      this.buttonLoading = true;
-      axios
-        .post(
-          process.env.NODE_ENV === "development"
-            ? process.env.VUE_APP_DEV_URL
-            : process.env.VUE_APP_PROD_URL,
-          {
-            url: this.urlFieldModel
-          }
-        )
-        .then(response => {
-          console.log("RESPONSE DATA", response.data);
-          this.parser(response.data);
-          this.buttonLoading = false;
-        })
-        .catch(e => {
-          console.log("Error", e);
-        });*/
-      this.urlParser();
+      if (this.compareMode === "url") {
+        this.urlParser();
+      } else {
+        console.log("Page Parser Called");
+        const firstRequest = axios.post(whichURL, { url: this.urlFieldFix });
+        const urlSetRequests = this.urlFieldModel.map(v =>
+          axios.post(whichURL, { url: v })
+        );
+        axios
+          .all([firstRequest, ...urlSetRequests])
+          .then(
+            axios.spread((...responses) => {
+              console.log("URL Set Responses", responses[0]);
+              //const selectors = this.chipModel.map(v => this.chips[v]).join(",");
+              const html1 = new DOMParser().parseFromString(
+                responses[0].data,
+                "text/html"
+              );
+              const firstElements = [...html1.querySelectorAll("meta")];
+              console.log("Elements Found", firstElements);
+              //console.log("URL Set Responses", responses.splice(1));
+              const filtered = firstElements.filter(m => {
+                const attribute = m.getAttribute("name");
+                return this.chips[this.chipModel] === attribute && m;
+              }).map(m => m.getAttribute('content'));
+              console.log("FİLTERED", filtered);
+            })
+          )
+          .catch(e => {
+            console.log("Error Received", e);
+          });
+        //this.pageParser();
+      }
     },
-    parser: function(v) {
+    pageParser: function(v) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
       const html1 = new DOMParser().parseFromString(v, "text/html");
       const firstElements = [...html1.querySelectorAll(selectors)];
@@ -181,10 +233,19 @@ export default {
     urlParser: async function() {
       console.log("Selected Fields", this.urlFieldModel);
 
-      const freqList = returnURLWithFrequencyList(this.urlFieldModel);
-      //const axiosRequests = [];
-      console.log("Freq List", freqList);
-      const freqListUpdated = freqList.map(m => {
+      const freqListFixed = returnURLWithFrequencyList([this.urlFieldFix]);
+      console.log("FIELD FIXED", freqListFixed);
+      const freqListSet = returnURLWithFrequencyList(this.urlFieldModel);
+      console.log("Freq List", freqListSet);
+
+      this.resolvedData = await this.resolvePromises(freqListFixed);
+      this.resolvedDataSet = await this.resolvePromises(freqListSet);
+
+      console.log("RESOLVED FOR FIXED", this.resolvedData);
+      console.log("RESOLVED FOR SET", this.resolvedDataSet);
+    },
+    resolvePromises: async function(data) {
+      const freqListUpdated = data.map(m => {
         const { frequencyList } = m;
         return {
           ...m,
@@ -192,20 +253,16 @@ export default {
             const { text } = v;
             return {
               ...v,
-              request: axios.post(
-                process.env.NODE_ENV === "development"
-                  ? process.env.VUE_APP_DEV_URL
-                  : process.env.VUE_APP_PROD_URL,
-                {
-                  url: `https://www.thesaurus.com/browse/${text}`
-                }
-              )
+              request: axios.post(whichURL, {
+                //url: `https://www.thesaurus.com/browse/${text}`
+                url: `https://tuna.thesaurus.com/pageData/${text}`
+              })
             };
           })
         };
       });
 
-      const returnV = await Promise.all(
+      return await Promise.all(
         freqListUpdated.map(async item => {
           console.log("PROMISE ALL ITEM", item);
           const obj = item;
@@ -214,7 +271,8 @@ export default {
               const request = await i.request;
               return {
                 ...i,
-                request: this.getWordsFromData(request["data"])
+                request: this.getSynonymsFromAPI(request["data"]["data"])
+                //request: this.getWordsFromData(request["data"]).split(" ")
               };
             })
           ).catch(e => {
@@ -226,11 +284,10 @@ export default {
       ).catch(e => {
         console.log("ERROR MAIN", e);
       });
-
-      console.log("RETURN V", returnV);
-      this.resolvedData = returnV;
-      console.log("Requests", this.resolvedData);
     },
+    /*
+     * This is used for parsing text from html page
+     * */
     getWordsFromData: function(data) {
       const newDomHtml = new DOMParser().parseFromString(data, "text/html");
       const selected = [
@@ -240,6 +297,21 @@ export default {
       ];
       console.log("Selected XPath", selected);
       return selected[0]["outerText"];
+    },
+    /*
+     * Deconstructing data that we received from API
+     * */
+    getSynonymsFromAPI: function(data) {
+      //return empty array if data is null
+      if (data === null) {
+        return [];
+      }
+      const { definitionData } = data;
+      const { definitions } = definitionData;
+      return definitions.map(m => {
+        const { synonyms } = m;
+        return { syn: synonyms };
+      });
     }
   }
 };
