@@ -100,44 +100,23 @@ export default {
       }
       console.log("Semantic");
       this.buttonLoading = true;
-      if (process.env.NODE_ENV === "development") {
-        axios
-          .post(process.env.VUE_APP_DEV_URL, {
+      axios
+        .post(
+          process.env.NODE_ENV === "development"
+            ? process.env.VUE_APP_DEV_URL
+            : process.env.VUE_APP_PROD_URL,
+          {
             url: this.urlFieldModel
-          })
-          .then(response => {
-            console.log("RESPONSE DATA", response.data);
-            this.parser(response.data);
-            this.buttonLoading = false;
-          })
-          .catch(e => {
-            console.log("Error", e);
-          });
-      } else {
-        axios
-          .get(this.urlFieldModel)
-          .then(response => {
-            console.log("RESPONSE DATA", response.data);
-            this.parser(response.data);
-            this.buttonLoading = false;
-          })
-          .catch(e => {
-            console.log("Error", e);
-          });
-
-        axios
-          .post("/urltest", {
-            url: this.urlFieldModel
-          })
-          .then(response => {
-            console.log("RESPONSE DATA", response.data);
-            this.parser(response.data);
-            this.buttonLoading = false;
-          })
-          .catch(e => {
-            console.log("Error", e);
-          });
-      }
+          }
+        )
+        .then(response => {
+          console.log("RESPONSE DATA", response.data);
+          this.parser(response.data);
+          this.buttonLoading = false;
+        })
+        .catch(e => {
+          console.log("Error", e);
+        });
     },
     parser: function(v) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");

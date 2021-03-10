@@ -27,7 +27,6 @@
       <v-app-bar-title>Web Indexing/Scraping</v-app-bar-title>
 
       <v-spacer></v-spacer>
-
     </v-app-bar>
 
     <v-main>
@@ -81,19 +80,15 @@ export default {
     ]
   }),
   methods: {
-    testRequest: function () {
-      axios.get('/urltest').then(res => {
-        console.log("Response", res);
-      }).catch(e => {
-        console.log("Error", e);
-      })
-
-
-      axios.post('/urltest', {url: 'https://google.com.tr'}).then(res => {
-        console.log("Response", res);
-      }).catch(e => {
-        console.log("Error", e);
-      })
+    testRequest: function() {
+      axios
+        .post(process.env.VUE_APP_PROD_URL, { url: "https://google.com.tr" })
+        .then(res => {
+          console.log("Response", res);
+        })
+        .catch(e => {
+          console.log("Error", e);
+        });
     }
   }
 };
