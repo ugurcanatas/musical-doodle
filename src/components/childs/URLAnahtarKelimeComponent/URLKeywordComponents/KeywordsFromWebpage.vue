@@ -44,7 +44,7 @@
               <v-combobox
                 label="Url 1"
                 :rules="getDefaultRule"
-                :items="defaultComboItems"
+                :items="getUrlSet"
                 v-model="urlFieldModel1"
               />
             </v-col>
@@ -52,7 +52,7 @@
               <v-combobox
                 label="Url 2"
                 :rules="getDefaultRule"
-                :items="defaultComboItems"
+                :items="getUrlSet"
                 v-model="urlFieldModel2"
               />
             </v-col>
@@ -88,7 +88,7 @@
 <script>
 import AnahtarKelimeDialog from "@/components/childs/URLAnahtarKelimeComponent/URLKeywordDialogs/AnahtarKelimeDialog";
 import axios from "axios";
-import { defaultRule, reducerFrequency } from "@/components/utils";
+import { defaultRule, reducerFrequency, whichURL, urlSet } from "@/components/utils";
 
 export default {
   name: "KeywordsFromWebpage",
@@ -104,17 +104,6 @@ export default {
   data() {
     return {
       valid: false,
-      defaultComboItems: [
-        "https://loremipsum.io/",
-        "https://lite.cnn.com/en",
-        "https://en.m.wikipedia.org/wiki/Riegelmann_Boardwalk",
-        "https://rawtext.club/",
-        "https://lite.poandpo.com/",
-        "https://www.w3schools.com/",
-        "https://www.washingtonpost.com/",
-        "https://www.nytimes.com/",
-        "https://www.wsj.com/"
-      ],
       buttonDisabled: true,
       buttonLoading: false,
       showDialog: false,
@@ -129,6 +118,9 @@ export default {
   computed: {
     getDefaultRule: function() {
       return defaultRule;
+    },
+    getUrlSet: function() {
+      return urlSet;
     }
   },
   methods: {
@@ -139,26 +131,26 @@ export default {
         return;
       }
       this.buttonLoading = true;
-      const requestFirst = axios.post("http://localhost:3000/urltest", {
+      const requestFirst = axios.post(whichURL, {
         url: this.urlFieldModel1
       });
-      const requestSecond = axios.post("http://localhost:3000/urltest", {
+      const requestSecond = axios.post(whichURL, {
         url: this.urlFieldModel2
       });
       axios
-          .all([requestFirst, requestSecond])
-          .then(
-              axios.spread((...responses) => {
-                const [responseFirst, responseSecond] = responses;
-                /*console.log("Res First", responseFirst.data);
+        .all([requestFirst, requestSecond])
+        .then(
+          axios.spread((...responses) => {
+            const [responseFirst, responseSecond] = responses;
+            /*console.log("Res First", responseFirst.data);
                 console.log("Res Second", responseSecond.data);*/
-                this.parser(responseFirst.data, responseSecond.data);
-                this.buttonLoading = false;
-              })
-          )
-          .catch(e => {
-            console.log("Error Received", e);
-          });
+            this.parser(responseFirst.data, responseSecond.data);
+            this.buttonLoading = false;
+          })
+        )
+        .catch(e => {
+          console.log("Error Received", e);
+        });
       console.log("ASDLKSAMDKASMDSAMD");
     },
     parser: function(v1, v2) {
@@ -172,54 +164,54 @@ export default {
       console.log("Parsed Second", secondElements);
 
       const tagsFirst = firstElements
-          .filter(tag => {
-            if (tag.hasAttribute("name")) {
-              console.log("HAS NAME", tag);
-              const name = tag.getAttribute("name");
-              console.log("NAME", name);
-              if (
-                  name.includes("title") ||
-                  name.includes("description") ||
-                  name.includes("Description") ||
-                  name.includes("keywords") ||
-                  name.includes("Keywords")
-              ) {
-                console.log("CONTENT ATTR", tag.getAttribute("content"));
-                return tag;
-              }
+        .filter(tag => {
+          if (tag.hasAttribute("name")) {
+            console.log("HAS NAME", tag);
+            const name = tag.getAttribute("name");
+            console.log("NAME", name);
+            if (
+              name.includes("title") ||
+              name.includes("description") ||
+              name.includes("Description") ||
+              name.includes("keywords") ||
+              name.includes("Keywords")
+            ) {
+              console.log("CONTENT ATTR", tag.getAttribute("content"));
+              return tag;
             }
-          })
-          .map(m => m.getAttribute("content"));
+          }
+        })
+        .map(m => m.getAttribute("content"));
 
       const tagsSecond = secondElements
-          .filter(tag => {
-            if (tag.hasAttribute("name")) {
-              console.log("HAS NAME", tag);
-              const name = tag.getAttribute("name").toLowerCase();
-              console.log("NAME", name);
-              if (
-                  name.includes("title") ||
-                  name.includes("description") ||
-                  name.includes("keywords")
-              ) {
-                console.log("CONTENT ATTR", tag.getAttribute("content"));
-                return tag;
-              }
+        .filter(tag => {
+          if (tag.hasAttribute("name")) {
+            console.log("HAS NAME", tag);
+            const name = tag.getAttribute("name").toLowerCase();
+            console.log("NAME", name);
+            if (
+              name.includes("title") ||
+              name.includes("description") ||
+              name.includes("keywords")
+            ) {
+              console.log("CONTENT ATTR", tag.getAttribute("content"));
+              return tag;
             }
-          })
-          .map(m => m.getAttribute("content"));
+          }
+        })
+        .map(m => m.getAttribute("content"));
 
       const eachWordFirst = tagsFirst
-          .join("")
-          .replace(/[()-,\n?!,*'":;]/g, " ")
-          .split(" ")
-          .filter(m => m.length !== 0);
+        .join("")
+        .replace(/[()-,\n?!,*'":;]/g, " ")
+        .split(" ")
+        .filter(m => m.length !== 0);
       console.log("Tags First", eachWordFirst);
       const eachWordSecond = tagsSecond
-          .join("")
-          .replace(/[()-,\n?!,*'":;]/g, " ")
-          .split(" ")
-          .filter(m => m.length !== 0);
+        .join("")
+        .replace(/[()-,\n?!,*'":;]/g, " ")
+        .split(" ")
+        .filter(m => m.length !== 0);
       console.log("Tags Second", eachWordSecond);
 
       this.sortedFrequency1 = reducerFrequency(eachWordFirst);
