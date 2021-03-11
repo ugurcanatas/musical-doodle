@@ -3,60 +3,8 @@
     <v-snackbar v-model="snackbar" :color="snack_color">
       {{ snack_text }}
     </v-snackbar>
-    <v-card>
-      <v-app-bar :color="componentItem.barColor" dense>
-        <v-app-bar-title class="white--text">{{
-          componentItem.label
-        }}</v-app-bar-title>
-        <v-spacer></v-spacer>
-        <v-btn
-          @click="request"
-          color="white"
-          medium
-          fab
-          icon
-          :loading="buttonLoading"
-          :disabled="buttonLoading"
-          ><v-icon>mdi-download</v-icon></v-btn
-        >
-        <v-btn
-          @click="showDialog = true"
-          color="white"
-          medium
-          fab
-          icon
-          :disabled="buttonDisabled"
-          ><v-icon>mdi-eye</v-icon></v-btn
-        >
-      </v-app-bar>
-      <v-card-text>
-        <v-form ref="url-form" v-model="formValid">
-          <v-combobox
-            v-model="urlFieldModel"
-            label="Url giriniz"
-            :rules="getDefaultRule"
-            :items="getUrlSet"
-          />
-        </v-form>
-      </v-card-text>
-      <v-col class="col-12">
-        <span class="mb-0"
-          >Filtreler: (İstenilen HTML etiketlerini seçebilirsiniz.)</span
-        >
-        <v-chip-group v-model="chipModel" multiple show-arrows>
-          <v-chip v-for="(chip, i) in chips" :key="i" filter outlined>
-            {{ chip }}
-          </v-chip>
-        </v-chip-group>
-      </v-col>
-    </v-card>
-    <u-r-l-frekans-dialog
-      :sorted-frequency="sortedFrequency"
-      :dialog-model="showDialog"
-      @frekansDialogClosed="frekansDialogClosed"
-    />
     <template>
-      <v-card :loading="buttonLoading" class="mx-auto my-12">
+      <v-card elevation="6" :loading="buttonLoading" class="mx-auto my-0">
         <template slot="progress">
           <v-progress-linear
             color="deep-purple"
@@ -64,18 +12,27 @@
             indeterminate
           ></v-progress-linear>
         </template>
-
-        <v-card-title>Cafe Badilico</v-card-title>
+        <v-card-title
+          :style="`background-color:${componentItem.barColor}`"
+          class="py-2 white--text"
+          >{{ componentItem.label }}</v-card-title
+        >
+        <v-card-text class="pb-0 pt-4">
+          <div class="my-0 subtitle-1">
+            {{ componentItem.excerpt }}
+          </div>
+        </v-card-text>
 
         <v-card-text>
-          <div class="my-4 subtitle-1">
-            $ • Italian, Cafe
-          </div>
-
-          <div>
-            Small plates, salads & sandwiches - an intimate setting with 12
-            indoor seats plus patio seating.
-          </div>
+          <v-form ref="url-form" v-model="formValid">
+            <v-combobox
+              class="pt-0"
+              v-model="urlFieldModel"
+              label="Url giriniz"
+              :rules="getDefaultRule"
+              :items="getUrlSet"
+            />
+          </v-form>
         </v-card-text>
 
         <v-divider class="mx-4"></v-divider>
@@ -97,13 +54,13 @@
         <v-divider class="mx-4"></v-divider>
         <v-card-actions class="ma-2">
           <v-btn
-              @click="request"
+            @click="request"
             :loading="buttonLoading"
             :disabled="buttonLoading"
             class="white--text"
             color="green darken-1"
           >
-            <v-icon left dark>mdi-magnify</v-icon>
+            <v-icon class="ml-0" left dark>mdi-magnify</v-icon>
             Frekans Ara
           </v-btn>
           <v-btn
@@ -112,12 +69,17 @@
             class="white--text"
             color="deep-purple lighten-2"
           >
-            <v-icon left dark>mdi-eye</v-icon>
+            <v-icon class="ml-0" left dark>mdi-eye</v-icon>
             Göster
           </v-btn>
         </v-card-actions>
       </v-card>
     </template>
+    <u-r-l-frekans-dialog
+      v-if="showDialog"
+      :sorted-frequency="sortedFrequency"
+      :overlay-value="buttonLoading"
+    />
   </div>
 </template>
 
@@ -228,4 +190,11 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.v-card--reveal {
+  bottom: 0;
+  opacity: 1 !important;
+  position: absolute;
+  width: 100%;
+}
+</style>

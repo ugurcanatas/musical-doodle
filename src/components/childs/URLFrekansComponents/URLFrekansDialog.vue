@@ -1,41 +1,33 @@
 <template>
-  <v-dialog
-    v-model="dialogModel"
-    persistent
-    width="500"
-    min-width="500"
-    :scrollable="false"
-  >
-    <v-app-bar color="indigo accent-4">
-      <v-app-bar-title class="white--text">Bulunan Kelimeler</v-app-bar-title>
-      <v-spacer></v-spacer>
-      <v-btn class="white--text" @click="$emit('frekansDialogClosed')" fab icon
-        ><v-icon>mdi-close</v-icon></v-btn
-      >
-    </v-app-bar>
-    <v-card max-height="500" style="overflow-y: scroll !important;">
-      <v-row no-gutters>
-        <v-col class="col-12">
-          <v-card-text style="height: 100%; background-color: white">
-            <div
-              class="d-inline-block ma-2"
-              v-for="(item, i) in sortedFrequency"
-              :key="i"
+  <v-card elevation="6" min-height="150" style="overflow-y: scroll !important;">
+    <v-overlay absolute :value="overlayValue">
+      <v-progress-circular
+          indeterminate
+          size="64"
+      ></v-progress-circular>
+    </v-overlay>
+    <v-card-title class="py-2">Sayfadaki kelime frekansları</v-card-title>
+    <v-row no-gutters>
+      <v-col class="col-12">
+        <v-card-text style="height: 100%; background-color: white">
+          <div
+            class="d-inline-block ma-2"
+            v-for="(item, i) in sortedFrequency"
+            :key="i"
+          >
+            <v-badge offset-x="10"
+              :content="item.size"
+              :value="item.size"
+              color="deep-purple"
+              overlap
             >
-              <v-badge style="font-size: 16px !important;"
-                :content="item.size"
-                :value="item.size"
-                color="green"
-                overlap
-              >
-                <v-chip :color="getColors(i)">{{ item.text }}</v-chip>
-              </v-badge>
-            </div>
-          </v-card-text>
-        </v-col>
-      </v-row>
-    </v-card>
-  </v-dialog>
+              <v-chip text-color="black" :color="getColors(i)">{{ item.text }}</v-chip>
+            </v-badge>
+          </div>
+        </v-card-text>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script>
@@ -47,7 +39,7 @@ export default {
     };
   },
   props: {
-    dialogModel: {
+    overlayValue: {
       type: Boolean,
       required: false,
       default: false
@@ -68,7 +60,7 @@ export default {
         case 2:
           return "brown lighten-2";
         default:
-          return "deep-purple lighten-4";
+          return "grey lighten-2";
       }
     }
   }
