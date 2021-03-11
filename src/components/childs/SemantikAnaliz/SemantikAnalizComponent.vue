@@ -1,112 +1,118 @@
 <template>
-  <v-card>
-    <v-app-bar :color="componentItem.barColor">
-      <v-app-bar-title class="white--text">{{
-        componentItem.label
-      }}</v-app-bar-title>
-      <v-spacer></v-spacer>
-      <v-row class="no-gutters">
-        <span class="white--text">URL Karşılaştır</span>
-        <v-switch
-          v-model="compareMode"
-          true-value="page"
-          false-value="url"
-          hide-details
-          class="align-center ml-4"
-          color="white"
-          inset
-        />
-        <span class="white--text">Sayfa Karşılaştır</span>
-      </v-row>
-      <v-col class="col-2">
-        <v-autocomplete
-          label="Sözlük API seçiniz"
-          v-model="dictModel"
-          :items="dictionaries"
-          item-text="name"
-          item-value="url"
-          hide-details
-          dense
-          dark
-        />
-      </v-col>
-      <v-btn
-        @click="request"
-        color="white"
-        medium
-        fab
-        icon
-        :loading="buttonLoading"
-        :disabled="buttonLoading"
-        ><v-icon>mdi-download</v-icon></v-btn
-      >
-      <v-btn
-        @click="showDialog = true"
-        color="white"
-        medium
-        fab
-        icon
-        :disabled="buttonDisabled"
-        ><v-icon>mdi-eye</v-icon></v-btn
-      >
-    </v-app-bar>
-    <v-card-text>
-      <v-form ref="semantic-form">
-        <v-row no-gutters>
-          <v-col class="col-6 pr-2">
-            <v-combobox
-              v-model="urlFieldFix"
-              label="Karşılaştırma yapılacak URL"
-              :items="getUrlSet"
-              :rules="getDefaultRule"
-            />
-          </v-col>
-          <v-col class="col-6 pl-2">
-            <v-combobox
-              multiple
-              v-model="urlFieldModel"
-              label="Url Set"
-              :rules="getDefaultRule"
-              :items="getUrlSet"
-            />
-          </v-col>
+  <div>
+    <v-card>
+      <v-app-bar :color="componentItem.barColor">
+        <v-app-bar-title class="white--text">{{
+          componentItem.label
+        }}</v-app-bar-title>
+        <v-spacer></v-spacer>
+        <v-row class="no-gutters">
+          <span class="white--text">URL Karşılaştır</span>
+          <v-switch
+            v-model="compareMode"
+            true-value="page"
+            false-value="url"
+            hide-details
+            class="align-center ml-4"
+            color="white"
+            inset
+          />
+          <span class="white--text">Sayfa Karşılaştır</span>
         </v-row>
-      </v-form>
-    </v-card-text>
-    <v-col class="col-12">
-      <span class="mb-0"
-        >Filtreler:
-        <span style="font-size: 14px !important;"
-          >(Web Siteleri ile ilgili anahtar kelimeleri/etiketleri meta ya da
-          title etiketine bakarak bulabiliriz.)</span
-        ></span
-      >
-      <v-chip-group v-model="chipModel" :multiple="false" show-arrows>
-        <v-chip
-          class="lighten-2"
-          text-color="white"
-          color="blue-grey"
-          active-class="darken-2"
-          v-for="(chip, i) in chips"
-          :key="i"
-          filter
+        <v-col class="col-2">
+          <v-autocomplete
+            label="Sözlük API seçiniz"
+            v-model="dictModel"
+            :items="dictionaries"
+            item-text="name"
+            item-value="url"
+            hide-details
+            dense
+            dark
+          />
+        </v-col>
+        <v-btn
+          @click="request"
+          color="white"
+          medium
+          fab
+          icon
+          :loading="buttonLoading"
+          :disabled="buttonLoading"
+          ><v-icon>mdi-download</v-icon></v-btn
         >
-          {{ chip }}
-        </v-chip>
-      </v-chip-group>
-      <v-row no-gutters>
-        <v-col class="col-6">
-          <p>{{ resolvedData }}</p>
-        </v-col>
-        <v-col class="col-6">
-          <p>{{ resolvedDataSet }}</p>
-        </v-col>
-      </v-row>
-    </v-col>
-  </v-card>
+        <v-btn
+          @click="showDialog = true"
+          color="white"
+          medium
+          fab
+          icon
+          :disabled="buttonDisabled"
+          ><v-icon>mdi-eye</v-icon></v-btn
+        >
+      </v-app-bar>
+      <v-card-text>
+        <v-form ref="semantic-form">
+          <v-row no-gutters>
+            <v-col class="col-6 pr-2">
+              <v-combobox
+                v-model="urlFieldFix"
+                label="Karşılaştırma yapılacak URL"
+                :items="getUrlSet"
+                :rules="getDefaultRule"
+              />
+            </v-col>
+            <v-col class="col-6 pl-2">
+              <v-combobox
+                multiple
+                v-model="urlFieldModel"
+                label="Url Set"
+                :rules="getDefaultRule"
+                :items="getUrlSet"
+              />
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+      <v-col class="col-12">
+        <span class="mb-0"
+          >Filtreler:
+          <span style="font-size: 14px !important;"
+            >(Web Siteleri ile ilgili anahtar kelimeleri/etiketleri meta ya da
+            title etiketine bakarak bulabiliriz.)</span
+          ></span
+        >
+        <v-chip-group v-model="chipModel" :multiple="false" show-arrows>
+          <v-chip
+            class="lighten-2"
+            text-color="white"
+            color="blue-grey"
+            active-class="darken-2"
+            v-for="(chip, i) in chips"
+            :key="i"
+            filter
+          >
+            {{ chip }}
+          </v-chip>
+        </v-chip-group>
+      </v-col>
+    </v-card>
+    <v-row v-if="compareMode === 'url'" no-gutters>
+      <compare-urls v-if="showDialog" :data-first-url="resolvedData" :data-url-set="resolvedDataSet" />
+    </v-row>
+    <v-row v-else-if="compareMode === 'page'" no-gutters>
+      <v-col class="col-6">
+        <p>{{ resolvedData }}</p>
+      </v-col>
+      <v-col class="col-6">
+        <p>{{ resolvedDataSet }}</p>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
 <script>
+import CompareUrls from "@/components/childs/SemantikAnaliz/CompareUrls";
 import {
   defaultRule,
   keywordRegex,
@@ -124,11 +130,14 @@ export default {
       type: Object
     }
   },
+  components: {
+    CompareUrls
+  },
   data() {
     return {
       urlFieldModel: "",
       urlFieldFix: "",
-      chipModel: [0],
+      chipModel: 0,
       chips: ["description", "title"],
       buttonLoading: false,
       buttonDisabled: true,
@@ -162,6 +171,7 @@ export default {
       if (!this.$refs["semantic-form"].validate()) {
         return;
       }
+      this.buttonLoading = true;
       console.log("Semantic");
       if (this.compareMode === "url") {
         this.urlParser();
@@ -184,10 +194,16 @@ export default {
               const firstElements = [...html1.querySelectorAll("meta")];
               console.log("Elements Found", firstElements);
               //console.log("URL Set Responses", responses.splice(1));
-              const filtered = firstElements.filter(m => {
-                const attribute = m.getAttribute("name");
-                return this.chips[this.chipModel] === attribute && m;
-              }).map(m => m.getAttribute('content'));
+              const filtered = firstElements
+                .filter(m => {
+                  const attribute = m.getAttribute("name");
+                  return this.chips[this.chipModel] === attribute && m;
+                })
+                .map(m => m.getAttribute("content"))
+                .join("")
+                .replace(keywordRegex, " ")
+                .split(" ")
+                .filter(m => m.length !== 0);
               console.log("FİLTERED", filtered);
             })
           )
@@ -243,6 +259,8 @@ export default {
 
       console.log("RESOLVED FOR FIXED", this.resolvedData);
       console.log("RESOLVED FOR SET", this.resolvedDataSet);
+      this.buttonLoading = false;
+      this.buttonDisabled = false;
     },
     resolvePromises: async function(data) {
       const freqListUpdated = data.map(m => {
