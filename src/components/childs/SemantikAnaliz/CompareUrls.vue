@@ -2,49 +2,78 @@
   <v-card class="mt-4">
     <v-card-title>URL Karşılaştırması</v-card-title>
     <v-row no-gutters>
-      <v-col class="col-6">
-        <v-card-text
-          >URL: <b>{{ dataFirstUrl[0].url }}</b></v-card-text
+      <v-col class="col-6 pa-4">
+        <p>
+          URL: <b>{{ dataFirstUrl[0].url }}</b>
+        </p>
+
+        <v-row
+          no-gutters
+          v-for="(item, i) in dataFirstUrl[0].frequencyList"
+          :key="i"
         >
-        <v-card-text>
-          <v-row
-            no-gutters
-            v-for="(item, i) in dataFirstUrl[0].frequencyList"
-            :key="i"
-          >
-            <p>
-              Kelime: <b>{{ item.text }}</b>
-            </p>
-            <div>
-              <p>Alakalı Kelimeler:</p>
-              <v-row
-                no-gutters
-                color="indigo"
-                v-for="(syn, y) in item.request"
-                :key="y"
-              >
-                <v-chip-group column>
-                  <v-chip
-                    :color="getColors(obj)"
-                    v-for="(obj, z) in syn.syn"
-                    :key="z"
-                  >
-                    <span class="white--text font-weight-bold">{{
-                      obj.term
-                    }}</span>
-                  </v-chip>
-                </v-chip-group>
-              </v-row>
-            </div>
-          </v-row>
-        </v-card-text>
+          <p>
+            Anahtar Kelime: <b>{{ item.text }}</b>
+          </p>
+          <v-col class="col-12">
+            <p>Alakalı Kelimeler:</p>
+            <v-row
+              no-gutters
+              color="indigo"
+              v-for="(syn, y) in item.request"
+              :key="y"
+            >
+              <v-chip-group column>
+                <v-chip
+                  :color="getColors(obj)"
+                  v-for="(obj, z) in syn.syn"
+                  :key="z"
+                >
+                  <span class="white--text font-weight-bold">{{
+                    obj.term
+                  }}</span>
+                </v-chip>
+              </v-chip-group>
+            </v-row>
+            <v-divider></v-divider>
+          </v-col>
+        </v-row>
       </v-col>
-      <v-col class="col-6">
+      <v-col class="col-6 pa-4">
         <v-row no-gutters>
           <v-col :key="item.url" v-for="item in dataUrlSet" class="col-12">
-            <v-card-text
-              >URL: <b>{{ item.url }}</b></v-card-text
-            >
+            <v-row no-gutters>
+              <v-col class="col-12" v-for="(item, i) in sortedUrlSet" :key="i">
+                <p>
+                  URL: <b>{{ item.url }}</b>
+                </p>
+                <p>Eşleşme Oranı: {{ Math.ceil(item.matchedRatio) }}</p>
+                <v-row
+                  v-for="(frequency, j) in item.frequencyList"
+                  :key="j"
+                  no-gutters
+                >
+                  <p>
+                    Anahtar Kelime: <b>{{ frequency.text }}</b>
+                  </p>
+                  <v-col class="col-12">
+                    <p>Alakalı Kelimeler:</p>
+                    <v-chip-group column>
+                      <v-chip
+                        :color="getColors(obj)"
+                        v-for="(obj, z) in frequency.request"
+                        :key="z"
+                      >
+                        <span class="white--text font-weight-bold">{{
+                          obj.term
+                        }}</span>
+                      </v-chip>
+                    </v-chip-group>
+                    <v-divider></v-divider>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
       </v-col>
@@ -67,10 +96,16 @@ export default {
   },
   data() {
     return {
-
+      sortedUrlSet: []
     };
   },
   computed: {
+    /*
+     * This function changes the object structure inside the
+     * dataUrlSet[index].frequencyList. If there is a match
+     * between two words, we are going to set property of matched
+     * to true otherwise false.
+     * */
     getValues: function() {
       const sorted2 = this.dataUrlSet;
       const sorted1 = this.dataFirstUrl[0].frequencyList;
@@ -81,8 +116,10 @@ export default {
           sorted1.forEach(obj => {
             if (flist.text === obj.text) {
               console.log("Words Matched !");
-              flist["matched"] = 1;
+              flist["matched"] = true;
               flist["original_frequency"] = obj.size;
+            } else {
+              flist["matched"] = false;
             }
           });
         });
@@ -91,64 +128,72 @@ export default {
     }
   },
   created() {
-
-    const updated = this.getValues;
-    console.log("UPDATED VALUES", updated);
-/*    const updatedSet = this.dataUrlSet
-      .map(set => {
-        const { frequencyList } = set;
+    this.sortedUrlSet = this.getValues
+      .map(v => {
+        const { url, frequencyList } = v;
         const justMatched = frequencyList.filter(obj => obj["matched"]);
         return {
-          ...set,
-          frequencyList: frequencyList.map(item => {
-            const { text, size } = item;
+          url,
+          frequencyList: frequencyList.map(m => {
+            const { request } = m;
+            let newRequestArr = [];
+            request.forEach(v => {
+              v.syn.forEach(w => {
+                newRequestArr.push(w);
+              });
+            });
+            console.log("NEW REQ ARRAY", newRequestArr);
             return {
-              ...item,
-              matched: this.getMatched(text, size)
+              ...m,
+              request: newRequestArr,
+              individualRatio: this.calculateIndividualPoints(m)
             };
           }),
-          matchedRatio: justMatched.length / this.dataFirstUrl[0].frequencyList.length
-          /!*          .map(item => {
-            const { matched, size, individualRatio } = item;
-          })*!/
+          matchedRatio:
+            justMatched.length / this.dataFirstUrl[0].frequencyList.length
         };
       })
-      .map(set => {
-        const { frequencyList } = set;
+      .map(v => {
+        const { frequencyList, matchedRatio } = v;
         let individualR = 0;
-        frequencyList.map(item => {
-          const { matched, size, individualRatio, request } = item;
-          if (matched === true) {
+        frequencyList.forEach(m => {
+          const { individualRatio, matched } = m;
+          if (matched) {
             individualR += individualRatio;
-            const similarity = request.filter(v =>
-                v.syn.filter(m => m.similarity)
-            );
-            let total = matchedRatio + (individualR / 100) * frequencyList.length;
           }
         });
-      });
-
-    console.log("URL SET UPDATED", updatedSet);*/
+        let total = matchedRatio + (individualR / 100) * frequencyList.length;
+        console.log("Total is => ", total);
+        return {
+          ...v,
+          matchedRatio: total > 100 ? 1 : total * 100
+        };
+      })
+      .sort((a, b) => b.matchedRatio - a.matchedRatio);
+    console.log("UPDATED VALUES", this.sortedUrlSet);
   },
   methods: {
-    calculatePoint: function(size, original_size) {
-      return size / original_size;
-    },
-    getMatched: function(text, size) {
-      const firstFrequencyList = this.dataFirstUrl[0].frequencyList;
-      let obj = {};
-      firstFrequencyList.forEach(v => {
-        if (v.text === text) {
-          obj = {
-            matched: true,
-            original_size: v.size,
-            individualRatio: this.calculatePoint(size, v.size)
-          };
-        } else {
-          obj = { matched: false };
-        }
+    calculateIndividualPoints: function(obj) {
+      if (!obj["matched"]) {
+        return 0;
+      }
+      const { original_frequency, size, request } = obj;
+      const similarities = request
+        .map(v =>
+          v.syn
+            .map(a => a.similarity)
+            .reduce((a, b) => {
+              return Number(a) + Number(b);
+            }, 0)
+        )
+        .map(m => m / 100);
+      const data = similarities.reduce((a, b) => {
+        return (a + b) / similarities.length;
       });
-      return obj;
+      console.log("SİMİLARİTİES", data);
+      const ratio = size / original_frequency + data;
+      console.log("RATIO", ratio);
+      return ratio;
     },
     getColors: function(obj) {
       const { similarity } = obj;

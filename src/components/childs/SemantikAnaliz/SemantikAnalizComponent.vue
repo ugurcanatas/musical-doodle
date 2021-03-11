@@ -97,10 +97,12 @@
         </v-chip-group>
       </v-col>
     </v-card>
-    <v-row v-if="compareMode === 'url'" no-gutters>
-      <compare-urls v-if="showDialog" :data-first-url="resolvedData" :data-url-set="resolvedDataSet" />
-    </v-row>
-    <v-row v-else-if="compareMode === 'page'" no-gutters>
+    <compare-urls
+      v-if="showDialog && compareMode === 'url'"
+      :data-first-url="resolvedData"
+      :data-url-set="resolvedDataSet"
+    />
+    <v-row v-else-if="showDialog && compareMode === 'page'" no-gutters>
       <v-col class="col-6">
         <p>{{ resolvedData }}</p>
       </v-col>
@@ -273,7 +275,7 @@ export default {
               ...v,
               request: axios.post(whichURL, {
                 //url: `https://www.thesaurus.com/browse/${text}`
-                url: `https://tuna.thesaurus.com/pageData/${text}`
+                url: `https://tuna.thesaurus.com/pageData/${text}?limit=10`
               })
             };
           })
