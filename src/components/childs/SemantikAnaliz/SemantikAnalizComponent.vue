@@ -102,14 +102,6 @@
       :data-first-url="resolvedData"
       :data-url-set="resolvedDataSet"
     />
-    <v-row v-else-if="showDialog && compareMode === 'page'" no-gutters>
-      <v-col class="col-6">
-        <p>{{ resolvedData }}</p>
-      </v-col>
-      <v-col class="col-6">
-        <p>{{ resolvedDataSet }}</p>
-      </v-col>
-    </v-row>
   </div>
 </template>
 

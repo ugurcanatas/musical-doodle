@@ -4,12 +4,12 @@
     <v-row no-gutters>
       <v-col class="col-6 pa-4">
         <p>
-          URL: <b>{{ dataFirstUrl[0].url }}</b>
+          URL: <b>{{ getFirstUrl.url }}</b>
         </p>
 
         <v-row
           no-gutters
-          v-for="(item, i) in dataFirstUrl[0].frequencyList"
+          v-for="(item, i) in getFirstUrl.frequencyList"
           :key="i"
         >
           <p>
@@ -17,61 +17,48 @@
           </p>
           <v-col class="col-12">
             <p>Alakalı Kelimeler:</p>
-            <v-row
-              no-gutters
-              color="indigo"
-              v-for="(syn, y) in item.request"
-              :key="y"
-            >
-              <v-chip-group column>
-                <v-chip
-                  :color="getColors(obj)"
-                  v-for="(obj, z) in syn.syn"
-                  :key="z"
-                >
-                  <span class="white--text font-weight-bold">{{
-                    obj.term
-                  }}</span>
-                </v-chip>
-              </v-chip-group>
-            </v-row>
+            <v-chip-group column>
+              <v-chip
+                :color="getColors(obj)"
+                v-for="(obj, z) in item.request"
+                :key="z"
+              >
+                <span class="white--text font-weight-bold">{{ obj.term }}</span>
+              </v-chip>
+            </v-chip-group>
             <v-divider></v-divider>
           </v-col>
         </v-row>
       </v-col>
       <v-col class="col-6 pa-4">
         <v-row no-gutters>
-          <v-col :key="item.url" v-for="item in dataUrlSet" class="col-12">
-            <v-row no-gutters>
-              <v-col class="col-12" v-for="(item, i) in sortedUrlSet" :key="i">
-                <p>
-                  URL: <b>{{ item.url }}</b>
-                </p>
-                <p>Eşleşme Oranı: {{ Math.ceil(item.matchedRatio) }}</p>
-                <v-row
-                  v-for="(frequency, j) in item.frequencyList"
-                  :key="j"
-                  no-gutters
-                >
-                  <p>
-                    Anahtar Kelime: <b>{{ frequency.text }}</b>
-                  </p>
-                  <v-col class="col-12">
-                    <p>Alakalı Kelimeler:</p>
-                    <v-chip-group column>
-                      <v-chip
-                        :color="getColors(obj)"
-                        v-for="(obj, z) in frequency.request"
-                        :key="z"
-                      >
-                        <span class="white--text font-weight-bold">{{
-                          obj.term
-                        }}</span>
-                      </v-chip>
-                    </v-chip-group>
-                    <v-divider></v-divider>
-                  </v-col>
-                </v-row>
+          <v-col class="col-12" v-for="(item, i) in getSortedURLSet" :key="i">
+            <p>
+              <v-icon>mdi-web</v-icon> URL: <b>{{ item.url }}</b>
+            </p>
+            <p>Eşleşme Puanı: {{ Math.ceil(item.matchedRatio) }}</p>
+            <v-row
+              v-for="(frequency, j) in item.frequencyList"
+              :key="j"
+              no-gutters
+            >
+              <p>
+                Anahtar Kelime: <b>{{ frequency.text }}</b>
+              </p>
+              <v-col class="col-12">
+                <p>Alakalı Kelimeler:</p>
+                <v-chip-group column>
+                  <v-chip
+                    :color="getColors(obj)"
+                    v-for="(obj, z) in frequency.request"
+                    :key="z"
+                  >
+                    <span class="white--text font-weight-bold">{{
+                      obj.term
+                    }}</span>
+                  </v-chip>
+                </v-chip-group>
+                <v-divider></v-divider>
               </v-col>
             </v-row>
           </v-col>
@@ -100,6 +87,27 @@ export default {
     };
   },
   computed: {
+    getFirstUrl: function() {
+      return this.dataFirstUrl.map(m => {
+        const { frequencyList } = m;
+        return {
+          ...m,
+          frequencyList: frequencyList.map(m => {
+            const { request } = m;
+            let newRequestArr = [];
+            request.forEach(v => {
+              v.syn.forEach(w => {
+                newRequestArr.push(w);
+              });
+            });
+            return {
+              ...m,
+              request: newRequestArr
+            };
+          })
+        };
+      })[0];
+    },
     /*
      * This function changes the object structure inside the
      * dataUrlSet[index].frequencyList. If there is a match
@@ -125,9 +133,55 @@ export default {
         });
       });
       return sorted2;
+    },
+    getSortedURLSet: function() {
+      const sortedUrlSet = this.getValues
+        .map(v => {
+          const { url, frequencyList } = v;
+          const justMatched = frequencyList.filter(obj => obj["matched"]);
+          return {
+            url,
+            frequencyList: frequencyList.map(m => {
+              const { request } = m;
+              let newRequestArr = [];
+              request.forEach(v => {
+                v.syn.forEach(w => {
+                  newRequestArr.push(w);
+                });
+              });
+              console.log("NEW REQ ARRAY", newRequestArr);
+              return {
+                ...m,
+                request: newRequestArr,
+                individualRatio: this.calculateIndividualPoints(m)
+              };
+            }),
+            matchedRatio:
+              justMatched.length / this.dataFirstUrl[0].frequencyList.length
+          };
+        })
+        .map(v => {
+          const { frequencyList, matchedRatio } = v;
+          let individualR = 0;
+          frequencyList.forEach(m => {
+            const { individualRatio, matched } = m;
+            if (matched) {
+              individualR += individualRatio;
+            }
+          });
+          let total = matchedRatio + (individualR / 100) * frequencyList.length;
+          console.log("Total is => ", total);
+          return {
+            ...v,
+            matchedRatio: total > 100 ? 1 : total * 100
+          };
+        })
+        .sort((a, b) => b.matchedRatio - a.matchedRatio);
+      console.log("UPDATED VALUES", sortedUrlSet);
+      return sortedUrlSet;
     }
   },
-  created() {
+  /*created() {
     this.sortedUrlSet = this.getValues
       .map(v => {
         const { url, frequencyList } = v;
@@ -171,7 +225,7 @@ export default {
       })
       .sort((a, b) => b.matchedRatio - a.matchedRatio);
     console.log("UPDATED VALUES", this.sortedUrlSet);
-  },
+  },*/
   methods: {
     calculateIndividualPoints: function(obj) {
       if (!obj["matched"]) {
