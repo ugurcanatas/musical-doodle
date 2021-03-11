@@ -53,7 +53,7 @@ export default {
     propsCars: [
       {
         path: "/url_frekans",
-        label: "URL Kelime Frekans",
+        label: "Website Kelime Scraping",
         component: URLFrekans,
         barColor: "#3d52d4"
       },

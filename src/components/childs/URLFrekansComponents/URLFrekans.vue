@@ -1,16 +1,8 @@
 <template>
   <div>
-    <v-snackbar
-        v-model="snackbar"
-        :color="snack_color"
-    >
+    <v-snackbar v-model="snackbar" :color="snack_color">
       {{ snack_text }}
     </v-snackbar>
-    <u-r-l-frekans-dialog
-      :sorted-frequency="sortedFrequency"
-      :dialog-model="showDialog"
-      @frekansDialogClosed="frekansDialogClosed"
-    />
     <v-card>
       <v-app-bar :color="componentItem.barColor" dense>
         <v-app-bar-title class="white--text">{{
@@ -58,6 +50,74 @@
         </v-chip-group>
       </v-col>
     </v-card>
+    <u-r-l-frekans-dialog
+      :sorted-frequency="sortedFrequency"
+      :dialog-model="showDialog"
+      @frekansDialogClosed="frekansDialogClosed"
+    />
+    <template>
+      <v-card :loading="buttonLoading" class="mx-auto my-12">
+        <template slot="progress">
+          <v-progress-linear
+            color="deep-purple"
+            height="10"
+            indeterminate
+          ></v-progress-linear>
+        </template>
+
+        <v-card-title>Cafe Badilico</v-card-title>
+
+        <v-card-text>
+          <div class="my-4 subtitle-1">
+            $ • Italian, Cafe
+          </div>
+
+          <div>
+            Small plates, salads & sandwiches - an intimate setting with 12
+            indoor seats plus patio seating.
+          </div>
+        </v-card-text>
+
+        <v-divider class="mx-4"></v-divider>
+
+        <v-card-title class="pb-2">Filtreler</v-card-title>
+        <v-card-text class="pb-0">
+          <div>
+            Seçtiğiniz HTML etiketlerine göre filtreleme yapılacaktır.
+          </div>
+        </v-card-text>
+
+        <v-card-text>
+          <v-chip-group v-model="chipModel" multiple column>
+            <v-chip v-for="(chip, i) in chips" :key="i" filter outlined>
+              {{ chip }}
+            </v-chip>
+          </v-chip-group>
+        </v-card-text>
+        <v-divider class="mx-4"></v-divider>
+        <v-card-actions class="ma-2">
+          <v-btn
+              @click="request"
+            :loading="buttonLoading"
+            :disabled="buttonLoading"
+            class="white--text"
+            color="green darken-1"
+          >
+            <v-icon left dark>mdi-magnify</v-icon>
+            Frekans Ara
+          </v-btn>
+          <v-btn
+            @click="showDialog = true"
+            :disabled="buttonDisabled"
+            class="white--text"
+            color="deep-purple lighten-2"
+          >
+            <v-icon left dark>mdi-eye</v-icon>
+            Göster
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
   </div>
 </template>
 
@@ -96,9 +156,9 @@ export default {
       showDialog: false,
       sortedFrequency: [],
       buttonDisabled: true,
-      snack_text: '',
+      snack_text: "",
       snackbar: false,
-      snack_color: 'error'
+      snack_color: "error"
     };
   },
   computed: {
@@ -113,7 +173,8 @@ export default {
     request: function() {
       if (!this.$refs["url-form"].validate() || this.chipModel.length === 0) {
         this.snackbar = true;
-        this.snack_text = "İstek yapabilmek için form dolu olmalı ve en az bir filtre seçilmelidir."
+        this.snack_text =
+          "İstek yapabilmek için form dolu olmalı ve en az bir filtre seçilmelidir.";
         return;
       }
       this.buttonLoading = true;
@@ -126,16 +187,16 @@ export default {
           console.log("Response Axios", res);
           this.buttonLoading = false;
           this.snackbar = true;
-          this.snack_text = 'Başarılı'
-          this.snack_color = 'success';
+          this.snack_text = "Başarılı";
+          this.snack_color = "success";
           this.createTexts(res.data);
         })
         .catch(e => {
           console.log("Error ", e);
           this.buttonLoading = false;
           this.snackbar = true;
-          this.snack_text = 'Bir hata oluştu'
-          this.snack_color = 'error';
+          this.snack_text = "Bir hata oluştu";
+          this.snack_color = "error";
         });
     },
     /**

@@ -12,7 +12,9 @@ const routes = [
     path: "/url_frekans",
     props: {
       componentItem: {
-        label: "URL Kelime Frekans",
+        label: "Website Kelime Scraping",
+        excerpt:
+          "Girilen URL içeriğinden kelime bulma ve bu kelimelerin frekanslarının hesaplanması.",
         barColor: "#3d52d4"
       }
     },
