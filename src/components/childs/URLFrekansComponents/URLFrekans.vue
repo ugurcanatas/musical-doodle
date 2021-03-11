@@ -7,7 +7,7 @@
       <v-card elevation="6" :loading="buttonLoading" class="mx-auto my-0">
         <template slot="progress">
           <v-progress-linear
-            color="deep-purple"
+            color="pink lighten-2"
             height="10"
             indeterminate
           ></v-progress-linear>
@@ -67,7 +67,7 @@
             @click="showDialog = true"
             :disabled="buttonDisabled"
             class="white--text"
-            color="deep-purple lighten-2"
+            color="blue accent-2"
           >
             <v-icon class="ml-0" left dark>mdi-eye</v-icon>
             Göster
