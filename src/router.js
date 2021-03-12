@@ -49,6 +49,8 @@ const routes = [
     props: {
       componentItem: {
         label: "Semantik Analiz Denemesi",
+        excerpt:
+          "URL'lerden çıkarılan anahtar kelimelerle semantik analiz yapılması.",
         barColor: "#a548e7"
       }
     },

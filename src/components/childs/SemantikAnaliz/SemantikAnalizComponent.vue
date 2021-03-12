@@ -1,104 +1,135 @@
 <template>
   <div>
-    <v-card>
-      <v-app-bar :color="componentItem.barColor">
-        <v-app-bar-title class="white--text">{{
-          componentItem.label
-        }}</v-app-bar-title>
-        <v-spacer></v-spacer>
-        <v-row class="no-gutters">
-          <span class="white--text">URL Karşılaştır</span>
-          <v-switch
-            v-model="compareMode"
-            true-value="page"
-            false-value="url"
-            hide-details
-            class="align-center ml-4"
-            color="white"
-            inset
-          />
-          <span class="white--text">Sayfa Karşılaştır</span>
-        </v-row>
-        <v-col class="col-2">
-          <v-autocomplete
-            label="Sözlük API seçiniz"
-            v-model="dictModel"
-            :items="dictionaries"
-            item-text="name"
-            item-value="url"
-            hide-details
-            dense
-            dark
-          />
-        </v-col>
-        <v-btn
-          @click="request"
-          color="white"
-          medium
-          fab
-          icon
-          :loading="buttonLoading"
-          :disabled="buttonLoading"
-          ><v-icon>mdi-download</v-icon></v-btn
+    <template>
+      <v-card elevation="6" :loading="buttonLoading" class="mx-auto my-0">
+        <template slot="progress">
+          <v-progress-linear
+            color="pink lighten-2"
+            height="10"
+            indeterminate
+          ></v-progress-linear>
+        </template>
+        <v-row
+          :style="`background-color:${componentItem.barColor}`"
+          class="align-center"
+          no-gutters
         >
-        <v-btn
-          @click="showDialog = true"
-          color="white"
-          medium
-          fab
-          icon
-          :disabled="buttonDisabled"
-          ><v-icon>mdi-eye</v-icon></v-btn
-        >
-      </v-app-bar>
-      <v-card-text>
-        <v-form ref="semantic-form">
-          <v-row no-gutters>
-            <v-col class="col-6 pr-2">
-              <v-combobox
-                v-model="urlFieldFix"
-                label="Karşılaştırma yapılacak URL"
-                :items="getUrlSet"
-                :rules="getDefaultRule"
-              />
-            </v-col>
-            <v-col class="col-6 pl-2">
-              <v-combobox
-                multiple
-                v-model="urlFieldModel"
-                label="Url Set"
-                :rules="getDefaultRule"
-                :items="getUrlSet"
-              />
-            </v-col>
+          <v-card-title class="py-2 white--text"
+            >{{ componentItem.label }}
+          </v-card-title>
+          <v-row no-gutters class="align-center justify-end">
+            <label class="pr-4 white--text">Mod Seçiniz</label>
+            <v-switch
+              v-model="compareMode"
+              true-value="page"
+              false-value="url"
+              color="white"
+              inset
+              flat
+            />
+            <v-chip style="width: 64px;"
+                text-color="white"
+                color="pink lighten-3"
+                class="ml-0 mr-4 justify-center"
+            >{{ compareMode === "url" ? "URL" : "Sayfa" }}</v-chip
+            >
           </v-row>
-        </v-form>
-      </v-card-text>
-      <v-col class="col-12">
-        <span class="mb-0"
-          >Filtreler:
-          <span style="font-size: 14px !important;"
-            >(Web Siteleri ile ilgili anahtar kelimeleri/etiketleri meta ya da
-            title etiketine bakarak bulabiliriz.)</span
-          ></span
-        >
-        <v-chip-group v-model="chipModel" :multiple="false" show-arrows>
-          <v-chip
-            class="lighten-2"
-            text-color="white"
-            color="blue-grey"
-            active-class="darken-2"
-            v-for="(chip, i) in chips"
-            :key="i"
-            filter
+          <div>
+            <v-select
+              class="pa-4"
+              dark
+              dense
+              hide-details
+              v-model="dictModel"
+              :items="dictionaries"
+              item-text="name"
+              item-value="url"
+              label="Sözlük API Seçiniz"
+            ></v-select>
+          </div>
+        </v-row>
+
+        <v-card-text class="pb-0 pt-4">
+          <div class="my-0 subtitle-1">
+            {{ componentItem.excerpt }}
+          </div>
+        </v-card-text>
+
+        <v-card-text>
+          <v-form ref="semantic-form">
+            <v-row no-gutters>
+              <v-col class="col-12">
+                <v-combobox
+                  v-model="urlFieldFix"
+                  label="Karşılaştırma yapılacak URL"
+                  :items="getUrlSet"
+                  :rules="getDefaultRule"
+                />
+              </v-col>
+              <v-col class="col-12">
+                <v-combobox
+                  multiple
+                  v-model="urlFieldModel"
+                  label="Url Set"
+                  :rules="getDefaultRule"
+                  :items="getUrlSet"
+                />
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-divider class="mx-4"></v-divider>
+
+        <v-card-title class="pb-2">Filtreler</v-card-title>
+        <v-card-text class="pb-0">
+          <div>
+            Anahtar kelimeleri, <code>meta</code> etiketi içerisindeki <code>description</code> veya <code>title</code> özelliklerine bakarak bulabiliriz.
+          </div>
+        </v-card-text>
+
+        <v-card-text>
+          <v-chip-group v-model="chipModel" :multiple="false" show-arrows>
+            <v-chip
+              class="lighten-2"
+              text-color="white"
+              color="blue-grey"
+              active-class="darken-2"
+              v-for="(chip, i) in chips"
+              :key="i"
+              filter
+            >
+              {{ chip }}
+            </v-chip>
+          </v-chip-group>
+        </v-card-text>
+
+        <v-divider class="mx-4"></v-divider>
+        <v-card-actions class="ma-2">
+          <v-btn
+            @click="request"
+            :loading="buttonLoading"
+            :disabled="buttonLoading"
+            class="white--text"
+            color="green darken-1"
           >
-            {{ chip }}
-          </v-chip>
-        </v-chip-group>
-      </v-col>
-    </v-card>
-    <compare-urls
-      v-if="showDialog && compareMode === 'url'"
+            <v-icon class="ml-0" left dark>mdi-magnify</v-icon>
+            Frekans Ara
+          </v-btn>
+          <v-btn
+            @click="showDialog = true"
+            :disabled="buttonDisabled"
+            class="white--text"
+            color="blue accent-2"
+          >
+            <v-icon class="ml-0" left dark>mdi-eye</v-icon>
+            Göster
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+    <component
+      :is="compareMode === 'url' && 'CompareUrls'"
+      v-if="showDialog"
       :data-first-url="resolvedData"
       :data-url-set="resolvedDataSet"
     />

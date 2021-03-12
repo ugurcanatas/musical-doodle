@@ -84,4 +84,29 @@ export default {
 svg text {
   font-family: "Roboto", sans-serif;
 }
+
+
+code {
+  color: #000000 !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  font-family: 'Menlo', sans-serif !important;
+  background-color: #e0e0e0 !important;
+}
+pre {
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  border-left: 3px solid #f36d33;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 1.6em;
+  max-width: 100%;
+  overflow: auto;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: break-word;
+}
 </style>
