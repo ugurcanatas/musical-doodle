@@ -11,32 +11,26 @@
       <v-overlay absolute :value="overlayValue">
         <v-progress-circular indeterminate size="64"></v-progress-circular>
       </v-overlay>
-      <v-card-title class="py-2"
-        ><v-icon class="mr-2">mdi-chart-line</v-icon>Sayfadaki kelime
-        frekansları</v-card-title
-      >
-      <v-row no-gutters>
-        <v-col class="col-12">
-          <v-card-text style="height: 100%; background-color: white">
-            <div
-              class="d-inline-block ma-2"
-              v-for="(item, i) in sortedFrequency"
-              :key="i"
-            >
+      <v-row class="pa-4" no-gutters>
+        <pre>
+            <label class="font-weight-medium black--text" style="font-size: 18px;">Sayfadaki kelime frekansları:</label>
+          <v-row no-gutters>
+            <div class="mr-4" v-for="(obj, z) in sortedFrequency"
+                 :key="z">
               <v-badge
-                offset-x="10"
-                :content="item.size"
-                :value="item.size"
-                color="deep-purple"
-                overlap
+                  offset-x="15"
+                  :content="obj.size"
+                  :value="obj.size"
+                  color="#f74f60"
+                  overlap
               >
-                <v-chip text-color="black" :color="getColors(i)">{{
-                  item.text
-                }}</v-chip>
-              </v-badge>
+              <code class="code-semantics" :class="(z===0||z === 1 || z === 2) ? 'black--text': 'white--text'"
+                    :style="`background-color:${getColors(z)} !important;`">{{obj
+                  .text}}</code>
+                </v-badge>
             </div>
-          </v-card-text>
-        </v-col>
+          </v-row>
+            </pre>
       </v-row>
     </v-card>
   </v-lazy>
@@ -66,17 +60,40 @@ export default {
     getColors: function(i) {
       switch (i) {
         case 0:
-          return "yellow accent-4";
+          return "#FFD700";
         case 1:
-          return "blue-grey lighten-2";
+          return "#C0C0C0";
         case 2:
-          return "brown lighten-2";
+          return "#cd7f32";
         default:
-          return "grey lighten-2";
+          return "#7a8add";
       }
     }
   }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.code-semantics {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  font-family: "Menlo", sans-serif !important;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.3);
+}
+pre {
+  background: #f5f5f5;
+  border: 1px solid #c8c8c8;
+  border-left: 3px solid #339236;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: "Menlo", sans-serif !important;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 100%;
+  overflow: auto;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: break-word;
+  white-space: pre-line;
+}
+</style>
