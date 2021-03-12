@@ -2,7 +2,7 @@
   <v-card flat class="mt-4">
     <v-card-title>URL Karşılaştırması</v-card-title>
     <v-row no-gutters>
-      <v-col class="col-6 pa-2">
+      <v-col class="col-xl-6 col-lg-6 col-sm-12 pa-2">
         <v-card elevation="6" class="pb-4">
           <v-row
             style="background-color: deeppink"
@@ -47,7 +47,7 @@
         </v-card>
       </v-col>
 
-      <v-col class="col-6 pa-2">
+      <v-col class="col-xl-6 col-lg-6 col-sm-12 pa-2">
         <v-card elevation="6" class="pb-4">
           <v-row
             style="background-color: deeppink"

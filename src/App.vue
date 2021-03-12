@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app id="main-wrap">
     <v-app-bar app style="background-color: wheat">
       <v-menu nudge-bottom="50" bottom left>
         <template v-slot:activator="{ on, attrs }">
@@ -36,6 +36,12 @@
         </v-col>
       </v-row>
     </v-main>
+    <v-fade-transition>
+    <v-btn @click="goTop" v-show="showUpBtn" small fixed right bottom
+           class="indigo accent-3" fab icon>
+      <v-icon class="white--text">mdi-chevron-up</v-icon>
+    </v-btn>
+    </v-fade-transition>
   </v-app>
 </template>
 
@@ -50,6 +56,7 @@ export default {
 
   data: () => ({
     //
+    showUpBtn: false,
     propsCars: [
       {
         path: "/url_frekans",
@@ -76,7 +83,18 @@ export default {
         barColor: "#a548e7"
       }
     ]
-  })
+  }),
+  mounted () {
+    document.addEventListener('scroll', this.scrollEvent, false);
+  },
+  methods: {
+    scrollEvent: function () {
+      this.showUpBtn = window.scrollY > 300;
+    },
+    goTop: function () {
+      window.scrollTo(0,0)
+    }
+  }
 };
 </script>
 
