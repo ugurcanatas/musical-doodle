@@ -1,68 +1,102 @@
 <template>
-  <v-card class="mt-4">
+  <v-card flat class="mt-4">
     <v-card-title>URL Karşılaştırması</v-card-title>
     <v-row no-gutters>
-      <v-col class="col-6 pa-4">
-        <p>
-          URL: <b>{{ getFirstUrl.url }}</b>
-        </p>
+      <v-col class="col-6 pa-2">
+        <v-card elevation="6" class="pb-4">
+          <v-row
+            style="background-color: deeppink"
+            class="align-center"
+            no-gutters
+          >
+            <v-card-title class="py-2 white--text"
+              >Karşılaştırılan URL
+            </v-card-title>
+          </v-row>
+          <div class="mx-4 pb-0 pt-4">
+            <pre
+              class="my-0"
+            ><label>URL:</label><code>{{ getFirstUrl.url }}</code></pre>
+          </div>
+          <v-divider class="mx-4"></v-divider>
 
-        <v-row
-          no-gutters
-          v-for="(item, i) in getFirstUrl.frequencyList"
-          :key="i"
-        >
-          <p>
-            Anahtar Kelime: <b>{{ item.text }}</b>
-          </p>
-          <v-col class="col-12">
-            <p>Alakalı Kelimeler:</p>
-            <v-chip-group column>
-              <v-chip
-                :color="getColors(obj)"
-                v-for="(obj, z) in item.request"
-                :key="z"
-              >
-                <span class="white--text font-weight-bold">{{ obj.term }}</span>
-              </v-chip>
-            </v-chip-group>
-            <v-divider></v-divider>
-          </v-col>
-        </v-row>
+          <v-card-title class="pb-2">Anahtar Kelimeler</v-card-title>
+          <v-card-text
+            v-for="(item, i) in getFirstUrl.frequencyList"
+            :key="i"
+            class="pb-0"
+          >
+            <div>
+              <pre>
+                <label>Kelime:</label>
+                <v-row no-gutters>
+                <code class="code-single-text">{{ item.text }}</code>
+                  <code class="code-single-text ml-4">{{ item.size }}</code>
+                    </v-row>
+                <v-divider class="mt-4"></v-divider>
+              <label>Alakalı kelimeler:</label>
+                <v-row no-gutters>
+                <div class="mr-4" v-for="(obj, z) in item.request"
+                     :key="z">
+                <code class="code-semantics" :style="`background-color:${getColors(obj)} !important;`">{{obj.term}}</code>
+                  </div>
+                  </v-row>
+              </pre>
+            </div>
+          </v-card-text>
+        </v-card>
       </v-col>
-      <v-col class="col-6 pa-4">
-        <v-row no-gutters>
-          <v-col class="col-12" v-for="(item, i) in getSortedURLSet" :key="i">
-            <p>
-              <v-icon>mdi-web</v-icon> URL: <b>{{ item.url }}</b>
-            </p>
-            <p>Eşleşme Puanı: {{ Math.ceil(item.matchedRatio) }}</p>
-            <v-row
-              v-for="(frequency, j) in item.frequencyList"
-              :key="j"
-              no-gutters
+
+      <v-col class="col-6 pa-2">
+        <v-card elevation="6" class="pb-4">
+          <v-row
+            style="background-color: deeppink"
+            class="align-center"
+            no-gutters
+          >
+            <v-card-title class="py-2 white--text"
+              >URL Set Sonuçlar</v-card-title
             >
-              <p>
-                Anahtar Kelime: <b>{{ frequency.text }}</b>
-              </p>
-              <v-col class="col-12">
-                <p>Alakalı Kelimeler:</p>
-                <v-chip-group column>
-                  <v-chip
-                    :color="getColors(obj)"
-                    v-for="(obj, z) in frequency.request"
-                    :key="z"
-                  >
-                    <span class="white--text font-weight-bold">{{
-                      obj.term
-                    }}</span>
-                  </v-chip>
-                </v-chip-group>
-                <v-divider></v-divider>
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-row>
+          </v-row>
+          <v-card-text
+            class="pb-0 pt-4"
+            v-for="(item, i) in getSortedURLSet"
+            :key="i"
+          >
+            <div class="mx-4 pb-0">
+              <pre
+                class="my-0"
+              ><label>URL:</label><code>{{ item.url }}</code>
+                <span>
+              <label>Eşleşme Puanı: </label><code class="code-matched-ratio">{{ item.matchedRatio }}</code>
+                  </span>
+              </pre>
+            </div>
+            <v-card-title class="pb-2">Anahtar Kelimeler</v-card-title>
+            <v-card-text
+              v-for="(freq, i) in item.frequencyList"
+              :key="i"
+              class="pb-0"
+            >
+              <div>
+                <pre><label>Kelime:</label>
+                  <v-row no-gutters>
+              <code class="code-single-text">{{ freq.text }}</code>
+                  <code class="code-single-text ml-4">{{ freq.size }}</code>
+                    </v-row>
+                <v-divider class="mt-4"></v-divider>
+              <label>Alakalı kelimeler:</label>
+                <v-row no-gutters>
+                <div class="mr-4" v-for="(obj, z) in freq.request"
+                     :key="z">
+                <code class="code-semantics" :style="`background-color:${getColors(obj)} !important;`">{{obj.term}}</code>
+                  </div>
+                  </v-row>
+              </pre>
+              </div>
+            </v-card-text>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
   </v-card>
@@ -96,7 +130,7 @@ export default {
             const { request } = m;
             let newRequestArr = [];
             request.forEach(v => {
-              v.syn.forEach(w => {
+              v.forEach(w => {
                 newRequestArr.push(w);
               });
             });
@@ -145,7 +179,7 @@ export default {
               const { request } = m;
               let newRequestArr = [];
               request.forEach(v => {
-                v.syn.forEach(w => {
+                v.forEach(w => {
                   newRequestArr.push(w);
                 });
               });
@@ -181,51 +215,6 @@ export default {
       return sortedUrlSet;
     }
   },
-  /*created() {
-    this.sortedUrlSet = this.getValues
-      .map(v => {
-        const { url, frequencyList } = v;
-        const justMatched = frequencyList.filter(obj => obj["matched"]);
-        return {
-          url,
-          frequencyList: frequencyList.map(m => {
-            const { request } = m;
-            let newRequestArr = [];
-            request.forEach(v => {
-              v.syn.forEach(w => {
-                newRequestArr.push(w);
-              });
-            });
-            console.log("NEW REQ ARRAY", newRequestArr);
-            return {
-              ...m,
-              request: newRequestArr,
-              individualRatio: this.calculateIndividualPoints(m)
-            };
-          }),
-          matchedRatio:
-            justMatched.length / this.dataFirstUrl[0].frequencyList.length
-        };
-      })
-      .map(v => {
-        const { frequencyList, matchedRatio } = v;
-        let individualR = 0;
-        frequencyList.forEach(m => {
-          const { individualRatio, matched } = m;
-          if (matched) {
-            individualR += individualRatio;
-          }
-        });
-        let total = matchedRatio + (individualR / 100) * frequencyList.length;
-        console.log("Total is => ", total);
-        return {
-          ...v,
-          matchedRatio: total > 100 ? 1 : total * 100
-        };
-      })
-      .sort((a, b) => b.matchedRatio - a.matchedRatio);
-    console.log("UPDATED VALUES", this.sortedUrlSet);
-  },*/
   methods: {
     calculateIndividualPoints: function(obj) {
       if (!obj["matched"]) {
@@ -234,7 +223,7 @@ export default {
       const { original_frequency, size, request } = obj;
       const similarities = request
         .map(v =>
-          v.syn
+          v
             .map(a => a.similarity)
             .reduce((a, b) => {
               return Number(a) + Number(b);
@@ -264,4 +253,51 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.code-matched-ratio {
+  color: white !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #e73650 !important;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.25);
+}
+.code-semantics {
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  font-family: "Menlo", sans-serif !important;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.3);
+}
+.code-single-text {
+  color: white !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #339236 !important;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.25);
+}
+code {
+  color: #000000 !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #e0e0e0 !important;
+}
+pre {
+  background: #f5f5f5;
+  border: 1px solid #c8c8c8;
+  border-left: 3px solid #339236;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: "Menlo", sans-serif !important;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 100%;
+  overflow: auto;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: break-word;
+  white-space: pre-line;
+}
+</style>

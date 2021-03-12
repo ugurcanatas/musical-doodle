@@ -27,11 +27,12 @@
               inset
               flat
             />
-            <v-chip style="width: 64px;"
-                text-color="white"
-                color="pink lighten-3"
-                class="ml-0 mr-4 justify-center"
-            >{{ compareMode === "url" ? "URL" : "Sayfa" }}</v-chip
+            <v-chip
+              style="width: 64px;"
+              text-color="white"
+              color="pink lighten-3"
+              class="ml-0 mr-4 justify-center"
+              >{{ compareMode === "url" ? "URL" : "Sayfa" }}</v-chip
             >
           </v-row>
           <div>
@@ -83,7 +84,9 @@
         <v-card-title class="pb-2">Filtreler</v-card-title>
         <v-card-text class="pb-0">
           <div>
-            Anahtar kelimeleri, <code>meta</code> etiketi içerisindeki <code>description</code> veya <code>title</code> özelliklerine bakarak bulabiliriz.
+            Anahtar kelimeleri, <code>meta</code> etiketi içerisindeki
+            <code>description</code> veya <code>title</code> özelliklerine
+            bakarak bulabiliriz. (Sayfa Modu için geçerlidir.)
           </div>
         </v-card-text>
 
@@ -172,11 +175,11 @@ export default {
       dictModel: "https://www.thesaurus.com/browse/",
       dictionaries: [
         {
-          name: "Türkçe sözlük",
+          name: "Türkçe Sözlük",
           url: "https://es-anlam.com/kelime/"
         },
         {
-          name: "İngilizce sözlük",
+          name: "The Saurus",
           url: "https://www.thesaurus.com/browse/"
         }
       ],
@@ -200,7 +203,7 @@ export default {
       console.log("Semantic");
       if (this.compareMode === "url") {
         this.urlParser();
-      } else {
+      } /*else {
         console.log("Page Parser Called");
         const firstRequest = axios.post(whichURL, { url: this.urlFieldFix });
         const urlSetRequests = this.urlFieldModel.map(v =>
@@ -235,8 +238,7 @@ export default {
           .catch(e => {
             console.log("Error Received", e);
           });
-        //this.pageParser();
-      }
+      }*/
     },
     pageParser: function(v) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
@@ -274,20 +276,21 @@ export default {
     urlParser: async function() {
       console.log("Selected Fields", this.urlFieldModel);
 
+      //returnURLWithFrequencyList param is array. That's why we are passing this as an array
       const freqListFixed = returnURLWithFrequencyList([this.urlFieldFix]);
       console.log("FIELD FIXED", freqListFixed);
       const freqListSet = returnURLWithFrequencyList(this.urlFieldModel);
       console.log("Freq List", freqListSet);
 
-      this.resolvedData = await this.resolvePromises(freqListFixed);
-      this.resolvedDataSet = await this.resolvePromises(freqListSet);
+      this.resolvedData = await this.postRequests(freqListFixed);
+      this.resolvedDataSet = await this.postRequests(freqListSet);
 
       console.log("RESOLVED FOR FIXED", this.resolvedData);
       console.log("RESOLVED FOR SET", this.resolvedDataSet);
       this.buttonLoading = false;
       this.buttonDisabled = false;
     },
-    resolvePromises: async function(data) {
+    postRequests: async function(data) {
       const freqListUpdated = data.map(m => {
         const { frequencyList } = m;
         return {
@@ -297,7 +300,6 @@ export default {
             return {
               ...v,
               request: axios.post(whichURL, {
-                //url: `https://www.thesaurus.com/browse/${text}`
                 url: `https://tuna.thesaurus.com/pageData/${text}?limit=10`
               })
             };
@@ -315,7 +317,6 @@ export default {
               return {
                 ...i,
                 request: this.getSynonymsFromAPI(request["data"]["data"])
-                //request: this.getWordsFromData(request["data"]).split(" ")
               };
             })
           ).catch(e => {
@@ -351,13 +352,36 @@ export default {
       }
       const { definitionData } = data;
       const { definitions } = definitionData;
-      return definitions.map(m => {
-        const { synonyms } = m;
-        return { syn: synonyms };
-      });
+      return definitions.map(m => m.synonyms);
     }
   }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+
+
+code {
+  color: #000000 !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  font-family: 'Menlo', sans-serif !important;
+  background-color: #e0e0e0 !important;
+}
+pre {
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  border-left: 3px solid #f36d33;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 1.6em;
+  max-width: 100%;
+  overflow: auto;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: break-word;
+}
+</style>

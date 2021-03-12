@@ -37,6 +37,9 @@ export const urlSet = [
 /**
  * Returns array of objects that contains url and frequecyList
  * @param model : Array -> Contains url set.
+ * First map functipn returns array of objects containing
+ * words extracted from URL. Chained map function takes those keywords,
+ * tries to remove all Numbers & empty elements inside array of strings
  * */
 export const returnURLWithFrequencyList = model => {
   return model
