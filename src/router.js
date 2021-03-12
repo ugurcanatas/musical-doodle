@@ -15,7 +15,7 @@ const routes = [
         label: "Website Kelime Scraping",
         excerpt:
           "Girilen URL içeriğinden kelime bulma ve bu kelimelerin frekanslarının hesaplanması.",
-        barColor: "#3d52d4"
+        barColor: "#224fd7"
       }
     },
     component: URLFrekans
@@ -25,7 +25,7 @@ const routes = [
     props: {
       componentItem1: {
         label: "Webpage Keywords",
-        barColor: "#52abae"
+        barColor: "#5552ae"
       },
       componentItem2: {
         label: "URL Keywords",

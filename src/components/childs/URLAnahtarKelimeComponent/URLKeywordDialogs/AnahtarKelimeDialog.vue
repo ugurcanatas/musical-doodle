@@ -1,93 +1,134 @@
 <template>
-  <v-dialog v-model="dialogModel" persistent width="500" min-width="500">
-    <v-app-bar color="indigo accent-4">
-      <v-app-bar-title class="white--text">Bulunan Kelimeler</v-app-bar-title>
-      <v-spacer></v-spacer>
-      <v-btn class="white--text" @click="compare" fab icon
-        ><v-icon>mdi-compare</v-icon></v-btn
+  <v-card flat class="pb-4 mt-4">
+    <v-row style="background-color: #ffffff" class="align-center" no-gutters>
+      <v-card-title class="py-2 black--text"
+        >Karşılaştırma Analizi</v-card-title
       >
-      <v-btn class="white--text" @click="$emit('anahtarDialogClosed')" fab icon
-        ><v-icon>mdi-close</v-icon></v-btn
-      >
-    </v-app-bar>
-    <v-card min-height="300" style="overflow-y: scroll !important;">
-      <v-row>
-        <v-col class="col-6">
-          <v-card-title>{{ urlName1 }}</v-card-title>
-          <v-card-subtitle
-            >Toplam Keyword: {{ sortedFrequency1.length }}</v-card-subtitle
+    </v-row>
+    <v-row no-gutters>
+      <v-col class="col-xl-6 col-lg-6 col-sm-12 pa-2">
+        <v-card elevation="6" class="pb-4">
+          <v-row
+            style="background-color: #2b7a45"
+            class="align-center"
+            no-gutters
           >
-          <v-card-text style="height: 100%; background-color: white">
-            <div
-              class="d-inline-block ma-2"
-              v-for="(item, i) in sortedFrequency1.slice(0, 5)"
-              :key="i"
-            >
-              <v-badge
-                style="font-size: 16px !important;"
-                :content="item.size"
-                :value="item.size"
-                color="green"
-                overlap
-              >
-                <v-chip :color="getColors(i)">{{ item.text }}</v-chip>
-              </v-badge>
-            </div>
-          </v-card-text>
-        </v-col>
-        <v-col class="col-6">
-          <v-card-title>{{ urlName2 }}</v-card-title>
-          <v-card-subtitle
-            >Toplam Keyword: {{ sortedFrequency2.length }}</v-card-subtitle
-          >
-          <v-card-text style="height: 100%; background-color: white">
-            <div
-              class="d-inline-block ma-2"
-              v-for="(item, i) in sortedFrequency2.slice(0, 5)"
-              :key="i"
-            >
-              <v-badge
-                style="font-size: 16px !important;"
-                :content="item.size"
-                :value="item.size"
-                color="green"
-                overlap
-              >
-                <v-chip :color="getColors(i)">{{ item.text }}</v-chip>
-              </v-badge>
-            </div>
-          </v-card-text>
-        </v-col>
-      </v-row>
-      <v-row no-gutters>
-        <v-card-title>Benzerlik Skoru</v-card-title>
+            <v-card-title class="py-2 white--text">Default URL</v-card-title>
+          </v-row>
+          <div class="mx-4 pb-0 pt-4">
+            <pre
+              class="my-0"
+            ><label class="font-weight-bold">URL:</label><code>{{ urlName1 }}</code></pre>
+            <pre
+              class="mt-4"
+            ><label class="font-weight-bold">Toplam Kelime Sayısı: </label><code
+                class="code-single-text">{{getWordTotal1
+              }}</code></pre>
+          </div>
+          <v-divider class="mx-4"></v-divider>
 
-        <v-card-subtitle
-          >Eşleşen Toplam: {{ matchedKeywords.length }}</v-card-subtitle
-        >
-        <svg width="500" height="60">
-          <rect width="400" height="50" x="50" fill="#e0e0e0" rx="4" />
-          <rect
-            id="svgBenzerlik"
-            width="0"
-            height="50"
-            x="50"
-            fill="#fcba03"
-            rx="4"
-          />
-          <text
-            id="svgBenzerlikText"
-            text-anchor="middle"
-            x="245"
-            y="30"
-            fill="black"
+          <v-row class="pa-4" no-gutters>
+            <pre><label>Anahtar Kelimeler: (Top 5)</label>
+            <v-row no-gutters>
+              <div
+            v-for="(freq, i) in sortedFrequency1.slice(0,5)"
+            :key="i"
+            class="mr-4"
           >
-            0
-          </text>
-        </svg>
-      </v-row>
-    </v-card>
-  </v-dialog>
+                <v-badge
+                      offset-x="15"
+                      :content="freq.size"
+                      :value="freq.size"
+                      color="#f74f60"
+                      overlap
+                  >
+                  <code class="code-semantics" :class="(i===0||i === 1 || i === 2) ? 'black--text': 'white--text'"
+                    :style="`background-color:${getColors(i)} !important;`">{{freq
+                  .text}}</code>
+                </v-badge>
+              </div>
+            </v-row>
+          </pre>
+          </v-row>
+        </v-card>
+      </v-col>
+      <v-col class="col-xl-6 col-lg-6 col-sm-12 pa-2">
+        <v-card elevation="6" class="pb-4">
+          <v-row
+            style="background-color: #2b7a45"
+            class="align-center"
+            no-gutters
+          >
+            <v-card-title class="py-2 white--text"
+              >Karşılaştırılan URL</v-card-title
+            >
+            <v-spacer></v-spacer>
+            <v-btn color="white" @click="compare" text>Karşılaştır</v-btn>
+          </v-row>
+          <v-row no-gutters class="text-center pt-0 mx-4">
+            <v-col class="col-12">
+              <pre><label class="font-weight-bold">Benzerlik Puanı: </label>
+            <svg width="500" height="60">
+              <rect width="400" height="50" x="50" fill="#e0e0e0" rx="4" />
+              <rect
+                  id="svgBenzerlik"
+                  width="0"
+                  height="50"
+                  x="50"
+                  fill="#fcba03"
+                  rx="4"
+              />
+              <text
+                  id="svgBenzerlikText"
+                  text-anchor="middle"
+                  x="245"
+                  y="30"
+                  fill="black"
+              >
+                0
+              </text>
+            </svg></pre>
+            </v-col>
+          </v-row>
+          <div class="mx-4 pb-0 pt-4">
+            <pre
+              class="my-0"
+            ><label class="font-weight-bold">URL:</label><code>{{ urlName2 }}</code></pre>
+            <pre
+              class="mt-4"
+            ><label class="font-weight-bold">Toplam Kelime Sayısı: </label><code
+                class="code-single-text">{{getWordTotal2
+              }}</code></pre>
+          </div>
+          <v-divider class="mx-4"></v-divider>
+
+          <v-row class="pa-4" no-gutters>
+            <pre><label>Anahtar Kelimeler: (Top 5)</label>
+            <v-row no-gutters>
+              <div
+                  v-for="(freq, i) in sortedFrequency2.slice(0,5)"
+                  :key="i"
+                  class="mr-4"
+              >
+                <v-badge
+                    offset-x="15"
+                    :content="freq.size"
+                    :value="freq.size"
+                    color="#f74f60"
+                    overlap
+                >
+                  <code class="code-semantics" :class="(i===0||i === 1 || i === 2) ? 'black--text': 'white--text'"
+                        :style="`background-color:${getColors(i)} !important;`">{{freq
+                      .text}}</code>
+                </v-badge>
+              </div>
+            </v-row>
+          </pre>
+          </v-row>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script>
@@ -122,6 +163,18 @@ export default {
     return {
       matchedKeywords: []
     };
+  },
+  computed: {
+    getWordTotal1: function() {
+      return this.sortedFrequency1.reduce((a, b) => {
+        return a + Number(b.size);
+      }, 0);
+    },
+    getWordTotal2: function() {
+      return this.sortedFrequency2.reduce((a, b) => {
+        return a + Number(b.size);
+      }, 0);
+    }
   },
   methods: {
     compare: function() {
@@ -188,17 +241,65 @@ export default {
     getColors: function(i) {
       switch (i) {
         case 0:
-          return "yellow accent-4";
+          return "#FFD700";
         case 1:
-          return "blue-grey lighten-2";
+          return "#C0C0C0";
         case 2:
-          return "brown lighten-2";
+          return "#cd7f32";
         default:
-          return "deep-purple lighten-4";
+          return "#7a8add";
       }
     }
   }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+#bar_text {
+  text-align: center;
+}
+#bar_chart {
+  height: 40px;
+  width: 400px;
+  background-color: #339236;
+  text-align: center;
+}
+.code-single-text {
+  color: white !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #339236 !important;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.25);
+}
+.code-semantics {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  font-family: "Menlo", sans-serif !important;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.3);
+}
+code {
+  color: #000000 !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #e0e0e0 !important;
+}
+pre {
+  background: #f5f5f5;
+  border: 1px solid #c8c8c8;
+  border-left: 3px solid #339236;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: "Menlo", sans-serif !important;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 100%;
+  width: 100%;
+  overflow: auto;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: break-word;
+  white-space: pre-line;
+}
+</style>

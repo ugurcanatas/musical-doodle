@@ -1,20 +1,37 @@
 <template>
   <div>
-    <anahtar-kelime-dialog
-      :sorted-frequency1="sortedFrequency1"
-      :sorted-frequency2="sortedFrequency2"
-      :dialog-model="showDialog"
-      @anahtarDialogClosed="anahtarDialogClosed"
-      :url-name1="urlFieldModel1"
-      :url-name2="urlFieldModel2"
-    />
-    <v-card elevation="6" class="pb-4">
+    <v-card :loading="buttonLoading" elevation="6" class="pb-4">
+      <template slot="progress">
+        <v-progress-linear
+            color="pink lighten-2"
+            height="10"
+            indeterminate
+        ></v-progress-linear>
+      </template>
       <v-row
         :style="`background-color: ${componentItem.barColor}`"
         class="align-center"
         no-gutters
       >
         <v-card-title class="py-2 white--text">Webpage Keywords </v-card-title>
+        <v-row no-gutters class="align-center justify-end">
+          <label class="pr-4 white--text">Mod Seçimi:</label>
+          <v-switch
+            v-model="compareMode"
+            true-value="page"
+            false-value="url"
+            color="white"
+            inset
+            flat
+          />
+          <v-chip
+            style="width: 64px;"
+            text-color="white"
+            color="pink lighten-3"
+            class="ml-0 mr-4 justify-center"
+            >{{ compareMode === "url" ? "URL" : "Sayfa" }}</v-chip
+          >
+        </v-row>
       </v-row>
       <div class="subtitle-1 mx-4 pb-0 pt-4">
         Web sayfası meta etiketlerini inceleyerek anahtar kelimelerin bulunması
@@ -49,26 +66,20 @@
       <v-card-text class="pb-0">
         <div>
           Anahtar kelimeleri, <code>meta</code> etiketi içerisindeki
-          <code>description</code>, <code>title</code>, <code>keywords</code>,
-          <code>application-name</code>,
-          <code>author</code>
-          özelliklerine bakarak bulabiliriz.
+          <code>description</code>, <code>keywords</code>,
+          <code>application-name</code>, <code>author</code> gibi özelliklere
+          bakarak bulabiliriz.<b>(sadece sayfa modunda geçerlidir)</b>
         </div>
       </v-card-text>
       <v-card-text>
-        <v-chip-group v-model="chipModel" multiple show-arrows>
-          <v-chip
-            class="lighten-2"
-            text-color="white"
-            color="blue-grey"
-            active-class="darken-2"
-            v-for="(chip, i) in chips"
-            :key="i"
-            filter
-          >
-            {{ chip }}
-          </v-chip>
-        </v-chip-group>
+        <v-combobox
+          multiple
+          :items="chips"
+          v-model="chipModel"
+          label="Filtre grubu"
+          chips
+          deletable-chips
+        />
       </v-card-text>
 
       <v-divider class="mx-4"></v-divider>
@@ -94,6 +105,13 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+    <anahtar-kelime-dialog
+      :sorted-frequency1="sortedFrequency1"
+      :sorted-frequency2="sortedFrequency2"
+      v-if="showDialog"
+      :url-name1="urlFieldModel1"
+      :url-name2="urlFieldModel2"
+    />
   </div>
 </template>
 
@@ -104,6 +122,7 @@ import axios from "axios";
 import {
   defaultRule,
   reducerFrequency,
+  keywordRegex,
   whichURL,
   urlSet
 } from "@/components/utils";
@@ -127,10 +146,11 @@ export default {
       showDialog: false,
       urlFieldModel1: "",
       urlFieldModel2: "",
-      chips: ["description", "title", "keywords", "application-name", "author"],
-      chipModel: [0],
+      chips: ["description", "keywords", "application-name", "author"],
+      chipModel: ["description", "keywords", "application-name", "author"],
       sortedFrequency1: [],
-      sortedFrequency2: []
+      sortedFrequency2: [],
+      compareMode: "page"
     };
   },
   computed: {
@@ -143,8 +163,6 @@ export default {
   },
   methods: {
     request: function() {
-      console.log("MDE", this.urlFieldModel1);
-      console.log("MDE", this.urlFieldModel2);
       if (!this.$refs["tag-form"].validate()) {
         return;
       }
@@ -160,26 +178,57 @@ export default {
         .then(
           axios.spread((...responses) => {
             const [responseFirst, responseSecond] = responses;
-            /*console.log("Res First", responseFirst.data);
-                console.log("Res Second", responseSecond.data);*/
             this.parser(responseFirst.data, responseSecond.data);
             this.buttonLoading = false;
           })
         )
         .catch(e => {
           console.log("Error Received", e);
+          this.buttonLoading = false;
         });
-      console.log("ASDLKSAMDKASMDSAMD");
     },
     parser: function(v1, v2) {
-      const selectors = this.chipModel.map(v => this.chips[v]);
       const html1 = new DOMParser().parseFromString(v1, "text/html");
       const firstElements = [...html1.querySelectorAll("meta")];
       const html2 = new DOMParser().parseFromString(v2, "text/html");
       const secondElements = [...html2.querySelectorAll("meta")];
 
-      console.log("Parsed First", firstElements);
-      const tagsFirst = firstElements
+      /*
+       * Filter meta tags first.
+       * Step 1. Clear tags that has empty name attribute
+       * Step 2. Return matched ones using selectors filter.
+       * */
+      const tagsFirst = this.filterMetaTags(firstElements, this.chipModel);
+      const tagsSecond = this.filterMetaTags(secondElements, this.chipModel);
+
+      /*
+       * Create array of strings containing each word for both urls
+       * */
+      const eachWordFirst = this.createWordArray(tagsFirst);
+      const eachWordSecond = this.createWordArray(tagsSecond);
+
+      console.log("EachWord First", eachWordFirst);
+      console.log("EachWord Second", eachWordSecond);
+
+      /*
+       * Call custom reducer function at the end
+       * */
+      this.sortedFrequency1 = reducerFrequency(eachWordFirst);
+      this.sortedFrequency2 = reducerFrequency(eachWordSecond);
+
+      this.buttonDisabled = false;
+      console.log("Frequency 1", this.sortedFrequency1);
+      console.log("Frequency 2", this.sortedFrequency2);
+    },
+    createWordArray: function(data) {
+      return data
+        .join("")
+        .replace(keywordRegex, " ")
+        .split(" ")
+        .filter(m => m.length !== 0);
+    },
+    filterMetaTags: function(data, selectors) {
+      return data
         .filter(meta => meta.getAttribute("name") !== null)
         .filter(meta => {
           const name = meta.getAttribute("name").toUpperCase();
@@ -190,73 +239,6 @@ export default {
           );
         })
         .map(m => m.getAttribute("content"));
-
-      console.log("TAGS FIRST", tagsFirst);
-
-      //console.log("Parsed Second", secondElements);
-
-      /*      const tagsFirst = firstElements
-        .filter(tag => {
-          if (tag.hasAttribute("name")) {
-            console.log("HAS NAME", tag);
-            const name = tag.getAttribute("name");
-            console.log("NAME", name);
-            if (
-              name.includes("title") ||
-              name.includes("description") ||
-              name.includes("Description") ||
-              name.includes("keywords") ||
-              name.includes("Keywords")
-            ) {
-              console.log("CONTENT ATTR", tag.getAttribute("content"));
-              return tag;
-            }
-          }
-        })
-        .map(m => m.getAttribute("content"));
-
-      console.log("TAGS FIRST", tagsFirst);*/
-      /*
-      const tagsSecond = secondElements
-        .filter(tag => {
-          if (tag.hasAttribute("name")) {
-            console.log("HAS NAME", tag);
-            const name = tag.getAttribute("name").toLowerCase();
-            console.log("NAME", name);
-            if (
-              name.includes("title") ||
-              name.includes("description") ||
-              name.includes("keywords")
-            ) {
-              console.log("CONTENT ATTR", tag.getAttribute("content"));
-              return tag;
-            }
-          }
-        })
-        .map(m => m.getAttribute("content"));
-
-      const eachWordFirst = tagsFirst
-        .join("")
-        .replace(/[()-,\n?!,*'":;]/g, " ")
-        .split(" ")
-        .filter(m => m.length !== 0);
-      console.log("Tags First", eachWordFirst);
-      const eachWordSecond = tagsSecond
-        .join("")
-        .replace(/[()-,\n?!,*'":;]/g, " ")
-        .split(" ")
-        .filter(m => m.length !== 0);
-      console.log("Tags Second", eachWordSecond);
-
-      this.sortedFrequency1 = reducerFrequency(eachWordFirst);
-      this.sortedFrequency2 = reducerFrequency(eachWordSecond);*/
-
-      this.buttonDisabled = false;
-      console.log("Frequency 1", this.sortedFrequency1);
-      console.log("Frequency 2", this.sortedFrequency2);
-    },
-    anahtarDialogClosed: function() {
-      this.showDialog = false;
     }
   }
 };

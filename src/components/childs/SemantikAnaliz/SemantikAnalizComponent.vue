@@ -18,7 +18,7 @@
             >{{ componentItem.label }}
           </v-card-title>
           <v-row no-gutters class="align-center justify-end">
-            <label class="pr-4 white--text">Mod Seçiniz</label>
+            <label class="pr-4 white--text">Mod Seçimi:</label>
             <v-switch
               v-model="compareMode"
               true-value="page"
