@@ -64,9 +64,7 @@
             :key="i"
           >
             <div class="mx-4 pb-0">
-              <pre
-                class="my-0"
-              ><label>URL:</label><code>{{ item.url }}</code>
+              <pre class="my-0"><label>URL:</label><code>{{ item.url }}</code>
                 <span>
               <label>Eşleşme Puanı: </label><code class="code-matched-ratio">{{ item.matchedRatio }}</code>
                   </span>
