@@ -55,16 +55,14 @@
           >
             <v-card-title class="py-2 white--text">URL Set</v-card-title>
           </v-row>
-          <v-row
+          <v-row class="mt-0"
             :key="item.url"
             v-for="(item, i) in getMatchedFiltered"
             no-gutters
           >
             <v-col class="col-12">
               <div class="mx-4 pb-0 pt-4 text-center">
-                <span style="font-size: 48px;">{{
-                  (i === 0 && "🥇") || (i === 1 && "🥈") || (i === 2 && "🥉")
-                }}</span>
+                <span style="font-size: 52px;">{{ getPrize(i) }}</span>
                 <pre class="my-0"><label>URL:</label><code>{{ item.url }}</code>
                 <span>
                   <label>Eşleşme Puanı:
@@ -76,8 +74,8 @@
               </pre>
               </div>
 
-                <div class="mx-4 pb-0 pt-4">
-                  <pre><label>Anahtar Kelimeler:</label>
+              <div class="mx-4 pb-0 pt-4">
+                <pre><label>Anahtar Kelimeler:</label>
                 <v-row no-gutters>
                   <div
                   v-for="(freq, i) in item.frequencyList"
@@ -98,7 +96,7 @@
               </div>
             </v-row>
               </pre>
-                </div>
+              </div>
             </v-col>
           </v-row>
         </v-card>
@@ -227,6 +225,18 @@ export default {
           return "#cd7f32";
         default:
           return "#7a8add";
+      }
+    },
+    getPrize: function(i) {
+      switch (i) {
+        case 0:
+          return "🥇";
+        case 1:
+          return "🥈";
+        case 2:
+          return "🥉";
+        default:
+          return "🏆";
       }
     }
   }
