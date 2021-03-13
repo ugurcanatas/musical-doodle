@@ -16,24 +16,68 @@
         <v-card-title class="py-2 white--text">Webpage Keywords </v-card-title>
       </v-row>
 
+      <div class="subtitle-1 mx-4 pb-0 pt-4">
+        Web Sayfası içeriği ve web site kümesine bakılarak hesap.
+      </div>
+      <v-divider class="mx-4"></v-divider>
+
+      <v-card-text>
+        <v-form ref="ranking-form" v-model="valid">
+          <v-row no-gutters>
+            <v-col class="col-6 pr-2">
+              <v-combobox
+                label="Url 1"
+                :rules="getDefaultRule"
+                :items="getUrlSet"
+                v-model="urlFieldModel1"
+              />
+            </v-col>
+            <v-col class="col-6 pl-2">
+              <v-combobox
+                label="Url 2"
+                :rules="getDefaultRule"
+                :items="getUrlSet"
+                v-model="urlFieldModel2"
+                multiple
+              />
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+      <v-divider class="mx-4"></v-divider>
+
+      <v-card-title class="pb-2">Filtreler</v-card-title>
+      <v-card-text class="pb-0">
+        <div>
+          Seçtiğiniz HTML etiketlerine göre filtreleme yapılacaktır.
+        </div>
+      </v-card-text>
+
+      <v-card-text>
+        <v-chip-group v-model="chipModel" multiple column>
+          <v-chip v-for="(chip, i) in chips" :key="i" filter outlined>
+            {{ chip }}
+          </v-chip>
+        </v-chip-group>
+      </v-card-text>
 
       <v-divider class="mx-4"></v-divider>
       <v-card-actions class="ma-2">
         <v-btn
-            @click="request"
-            :loading="buttonLoading"
-            :disabled="buttonLoading"
-            class="white--text"
-            color="green darken-1"
+          @click="request"
+          :loading="buttonLoading"
+          :disabled="buttonLoading"
+          class="white--text"
+          color="green darken-1"
         >
           <v-icon class="ml-0" left dark>mdi-magnify</v-icon>
           Anahtar Kelime Ara
         </v-btn>
         <v-btn
-            @click="showDialog = true"
-            :disabled="buttonDisabled"
-            class="white--text"
-            color="blue accent-2"
+          @click="showDialog = true"
+          :disabled="buttonDisabled"
+          class="white--text"
+          color="blue accent-2"
         >
           <v-icon class="ml-0" left dark>mdi-eye</v-icon>
           Göster
@@ -47,7 +91,13 @@
 /*eslint-disable*/
 import SiteRankingDialog from "@/components/childs/SiteSıralama/SiteRankingDialog";
 import { v4 as uuidv4 } from "uuid";
-import { defaultRule, convertUrlsToTreeViews, whichURL, urlSet } from "@/components/utils";
+import {
+  defaultRule,
+  reducerFrequency,
+  whichURL,
+  urlSet,
+  keywordRegex
+} from "@/components/utils";
 import axios from "axios";
 
 export default {
@@ -63,15 +113,11 @@ export default {
   },
   data() {
     return {
-      urlFieldModel: "",
-      defaultComboItems: [
-        "https://www.washingtonpost.com/",
-        "https://www.nytimes.com/",
-        "https://www.wsj.com/",
-        "https://github.com/"
-      ],
-      chipModel: [],
-      chips: ["url", "sitemap", "a"],
+      urlFieldModel1: "",
+      urlFieldModel2: [],
+      valid: false,
+      chipModel: [0],
+      chips: ["p", "h1", "h2", "h3", "h4", "h5", "blockquote"],
       derinlikModel: "1",
       buttonLoading: false,
       buttonDisabled: true,
@@ -88,33 +134,63 @@ export default {
     },
     getUrlSet: function() {
       return urlSet;
-    },
+    }
   },
   methods: {
-    request: function () {
+    request: function() {
       if (!this.$refs["ranking-form"].validate()) {
         return;
       }
       this.buttonLoading = true;
-      console.log("Model", this.urlFieldModel);
+      console.log("Model", this.urlFieldModel1);
+      const requestMain = axios.post(whichURL, {
+        url: this.urlFieldModel1
+      });
+
+      const requestSet = this.urlFieldModel2.map(v =>
+        axios.post(whichURL, {
+          url: v
+        })
+      );
+
       axios
-          .post(whichURL, {
-            url: this.getDynamicURL()
-          })
-          .then(res => {
-            console.log("Response Axios", res);
+        .all([requestMain, ...requestSet])
+        .then(
+          axios.spread((...responses) => {
+            const mainResponse = responses[0];
+            const setResponses = responses.splice(1);
+            console.log("RESPONSES RANKING", setResponses);
             this.buttonLoading = false;
-            this.createHTML(res.data);
+            this.parseMain(mainResponse.data);
           })
-          .catch(e => {
-            console.log("Error ", e);
-          });
+        )
+        .catch(e => {
+          console.log("Error Received", e);
+          this.buttonLoading = false;
+        });
     },
+    parseMain: function(data) {
+      const selectors = this.chipModel.map(v => this.chips[v]).join(",");
+      console.log("FİLTERS", selectors);
+      this.htmlData = new DOMParser().parseFromString(data, "text/html");
+      const domElements = [...this.htmlData.querySelectorAll(selectors)];
+
+      const words = domElements
+        .map(m => m.innerText)
+        .join(" ")
+        .replace(keywordRegex, "")
+        .split(" ")
+      .filter(m => m !== '');
+      console.log("Elements Parsed Text", words);
+      const mainFrequency = reducerFrequency(words);
+      console.log("mainFrequency", mainFrequency);
+    },
+    parseSet: function(datas) {}
     /*
      * Return url concat.
      * determined by which filter is selected.
      * */
-    getDynamicURL: function () {
+    /*getDynamicURL: function () {
       switch (this.chipModel) {
         case 0:
           return `${this.urlFieldModel}sitemap.xml`;
@@ -125,7 +201,7 @@ export default {
         default:
           return this.urlFieldModel;
       }
-    },
+    },*/
   }
 };
 </script>

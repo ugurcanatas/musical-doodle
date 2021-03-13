@@ -136,12 +136,3 @@ export const convertUrlsToTreeViews = (data, depth, url) => {
   console.log("TEST", treeview);
   return treeview;
 };
-/*eslint-disable*/
-const convertToArrayOfObjects = array => {
-  return array.map(m => {
-    return {
-      name: m,
-      key: uuidv4()
-    };
-  });
-};
