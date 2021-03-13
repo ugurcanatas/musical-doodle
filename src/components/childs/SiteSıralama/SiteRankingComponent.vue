@@ -13,7 +13,7 @@
         class="align-center"
         no-gutters
       >
-        <v-card-title class="py-2 white--text">Webpage Keywords </v-card-title>
+        <v-card-title class="py-2 white--text">{{componentItem.label}} </v-card-title>
       </v-row>
 
       <div class="subtitle-1 mx-4 pb-0 pt-4">
@@ -158,10 +158,11 @@ export default {
         .then(
           axios.spread((...responses) => {
             const mainResponse = responses[0];
-            const setResponses = responses.splice(1);
+            const setResponses = responses.splice(1).map(v => v.data);
             console.log("RESPONSES RANKING", setResponses);
             this.buttonLoading = false;
             this.parseMain(mainResponse.data);
+            this.parseSet(setResponses);
           })
         )
         .catch(e => {
@@ -172,36 +173,39 @@ export default {
     parseMain: function(data) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
       console.log("FİLTERS", selectors);
-      this.htmlData = new DOMParser().parseFromString(data, "text/html");
-      const domElements = [...this.htmlData.querySelectorAll(selectors)];
+      const htmlData = new DOMParser().parseFromString(data, "text/html");
+      const domElements = [...htmlData.querySelectorAll(selectors)];
 
       const words = domElements
         .map(m => m.innerText)
         .join(" ")
         .replace(keywordRegex, "")
         .split(" ")
-      .filter(m => m !== '');
+        .filter(m => m !== "");
       console.log("Elements Parsed Text", words);
       const mainFrequency = reducerFrequency(words);
       console.log("mainFrequency", mainFrequency);
     },
-    parseSet: function(datas) {}
-    /*
-     * Return url concat.
-     * determined by which filter is selected.
-     * */
-    /*getDynamicURL: function () {
-      switch (this.chipModel) {
-        case 0:
-          return `${this.urlFieldModel}sitemap.xml`;
-        case 1:
-          return `${this.urlFieldModel}sitemap.xml`;
-        case 2:
-          return this.urlFieldModel;
-        default:
-          return this.urlFieldModel;
-      }
-    },*/
+    parseSet: function(datas) {
+      const selectors = this.chipModel.map(v => this.chips[v]).join(",");
+      const setOfUrls = datas.map((v, i) => {
+        console.log("FİLTERS", selectors);
+        const htmlData = new DOMParser().parseFromString(v, "text/html");
+        const domElements = [...htmlData.querySelectorAll(selectors)];
+        const words = domElements
+          .map(m => m.innerText)
+          .join(" ")
+          .replace(keywordRegex, "")
+          .split(" ")
+          .filter(m => m !== "");
+        console.log("Elements Parsed for Second", words);
+        return {
+          url: this.urlFieldModel2[i],
+          frequencyList: reducerFrequency(words)
+        };
+      });
+      console.log("Set Of Url's", setOfUrls);
+    }
   }
 };
 </script>

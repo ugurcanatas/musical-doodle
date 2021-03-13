@@ -34,7 +34,7 @@ const routes = [
     path: "/site_ranking",
     props: {
       componentItem: {
-        label: "Site Sıralamaları",
+        label: "Site Rankings",
         barColor: "#c19641"
       }
     },
