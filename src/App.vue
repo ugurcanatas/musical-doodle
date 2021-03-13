@@ -47,9 +47,10 @@
 
 <script>
 import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
-import URLAnahtarKelime from "@/components/childs/URLAnahtarKelimeComponent/URLAnahtarKelime";
 import SiteRankingComponent from "@/components/childs/SiteSıralama/SiteRankingComponent";
 import SemantikAnalizComponent from "@/components/childs/SemantikAnaliz/SemantikAnalizComponent";
+import KeywordsFromWebpage
+  from "@/components/childs/URLAnahtarKelimeComponent/URLKeywordComponents/KeywordsFromWebpage";
 
 export default {
   name: "App",
@@ -67,7 +68,7 @@ export default {
       {
         path: "/url_keywords",
         label: "URL Anahtar Kelime/Etiket",
-        component: URLAnahtarKelime,
+        component: KeywordsFromWebpage,
         barColor: "#52abae"
       },
       {
@@ -101,5 +102,52 @@ export default {
 <style>
 svg text {
   font-family: "Roboto", sans-serif;
+}
+.code-matched-ratio {
+  color: white !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #e73650 !important;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.25);
+}
+.code-semantics {
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  font-family: "Menlo", sans-serif !important;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.3);
+}
+.code-single-text {
+  color: white !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #339236 !important;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.25);
+}
+code {
+  color: #000000 !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #e0e0e0 !important;
+}
+pre {
+  background: #f5f5f5;
+  border: 1px solid #c8c8c8;
+  border-left: 3px solid #339236;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: "Menlo", sans-serif !important;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 100%;
+  width: 100%;
+  overflow: auto;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: break-word;
+  white-space: pre-line;
 }
 </style>

@@ -1,9 +1,9 @@
 import Vue from "vue";
 import Router from "vue-router";
 import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
-import URLAnahtarKelime from "@/components/childs/URLAnahtarKelimeComponent/URLAnahtarKelime";
 import SiteRankingComponent from "@/components/childs/SiteSıralama/SiteRankingComponent";
 import SemantikAnalizComponent from "@/components/childs/SemantikAnaliz/SemantikAnalizComponent";
+import KeywordsFromWebpage from "@/components/childs/URLAnahtarKelimeComponent/URLKeywordComponents/KeywordsFromWebpage";
 
 Vue.use(Router);
 
@@ -23,16 +23,12 @@ const routes = [
   {
     path: "/url_keywords",
     props: {
-      componentItem1: {
+      componentItem: {
         label: "Webpage Keywords",
-        barColor: "#5552ae"
-      },
-      componentItem2: {
-        label: "URL Keywords",
         barColor: "#5552ae"
       }
     },
-    component: URLAnahtarKelime
+    component: KeywordsFromWebpage
   },
   {
     path: "/site_ranking",

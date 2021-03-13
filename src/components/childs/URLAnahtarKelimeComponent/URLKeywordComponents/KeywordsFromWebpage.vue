@@ -1,11 +1,11 @@
 <template>
   <div>
-    <v-card :loading="buttonLoading" elevation="6" class="pb-4">
+    <v-card :loading="buttonLoading" elevation="6">
       <template slot="progress">
         <v-progress-linear
-            color="pink lighten-2"
-            height="10"
-            indeterminate
+          color="pink lighten-2"
+          height="10"
+          indeterminate
         ></v-progress-linear>
       </template>
       <v-row
@@ -15,7 +15,7 @@
       >
         <v-card-title class="py-2 white--text">Webpage Keywords </v-card-title>
         <v-row no-gutters class="align-center justify-end">
-          <label class="pr-4 white--text">Mod Seçimi:</label>
+          <label class="pr-4 white--text">Karşılaştırma Tipi:</label>
           <v-switch
             v-model="compareMode"
             true-value="page"
@@ -52,35 +52,46 @@
             </v-col>
             <v-col class="col-6 pl-2">
               <v-combobox
+                v-if="compareMode === 'page'"
                 label="Url 2"
                 :rules="getDefaultRule"
                 :items="getUrlSet"
                 v-model="urlFieldModel2"
+              />
+              <v-combobox
+                v-else
+                label="Url 2"
+                :rules="getDefaultRule"
+                :items="getUrlSet"
+                v-model="urlFieldModel3"
+                multiple
               />
             </v-col>
           </v-row>
         </v-form>
       </v-card-text>
 
-      <v-card-title class="pb-2">Filtreler</v-card-title>
-      <v-card-text class="pb-0">
-        <div>
-          Anahtar kelimeleri, <code>meta</code> etiketi içerisindeki
-          <code>description</code>, <code>keywords</code>,
-          <code>application-name</code>, <code>author</code> gibi özelliklere
-          bakarak bulabiliriz.<b>(sadece sayfa modunda geçerlidir)</b>
-        </div>
-      </v-card-text>
-      <v-card-text>
-        <v-combobox
-          multiple
-          :items="chips"
-          v-model="chipModel"
-          label="Filtre grubu"
-          chips
-          deletable-chips
-        />
-      </v-card-text>
+      <div v-if="compareMode === 'page'">
+        <v-card-title class="pb-2">Filtreler</v-card-title>
+        <v-card-text class="pb-0">
+          <div>
+            Anahtar kelimeleri, <code>meta</code> etiketi içerisindeki
+            <code>description</code>, <code>keywords</code>,
+            <code>application-name</code>, <code>author</code> gibi özelliklere
+            bakarak bulabiliriz.<b>(Sadece sayfa modunda geçerlidir)</b>
+          </div>
+        </v-card-text>
+        <v-card-text>
+          <v-combobox
+            multiple
+            :items="chips"
+            v-model="chipModel"
+            label="Filtre grubu"
+            chips
+            deletable-chips
+          />
+        </v-card-text>
+      </div>
 
       <v-divider class="mx-4"></v-divider>
       <v-card-actions class="ma-2">
@@ -108,23 +119,30 @@
     <anahtar-kelime-dialog
       :sorted-frequency1="sortedFrequency1"
       :sorted-frequency2="sortedFrequency2"
-      v-if="showDialog"
+      v-if="showDialog && compareMode === 'page'"
       :url-name1="urlFieldModel1"
       :url-name2="urlFieldModel2"
+    />
+    <u-r-l-keyword-dialog
+      :sorted-frequency1="sortedFrequencyURL1"
+      :sorted-frequency2="sortedFrequencyURL2"
+      :default-url="urlFieldModel1"
+      v-if="showDialog && compareMode === 'url'"
     />
   </div>
 </template>
 
 <script>
-/*eslint-disable*/
 import AnahtarKelimeDialog from "@/components/childs/URLAnahtarKelimeComponent/URLKeywordDialogs/AnahtarKelimeDialog";
+import URLKeywordDialog from "@/components/childs/URLAnahtarKelimeComponent/URLKeywordDialogs/URLKeywordDialog";
 import axios from "axios";
 import {
   defaultRule,
   reducerFrequency,
   keywordRegex,
   whichURL,
-  urlSet
+  urlSet,
+  createWords
 } from "@/components/utils";
 
 export default {
@@ -136,7 +154,8 @@ export default {
     }
   },
   components: {
-    AnahtarKelimeDialog
+    AnahtarKelimeDialog,
+    URLKeywordDialog
   },
   data() {
     return {
@@ -146,10 +165,13 @@ export default {
       showDialog: false,
       urlFieldModel1: "",
       urlFieldModel2: "",
+      urlFieldModel3: [],
       chips: ["description", "keywords", "application-name", "author"],
       chipModel: ["description", "keywords", "application-name", "author"],
       sortedFrequency1: [],
       sortedFrequency2: [],
+      sortedFrequencyURL1: [],
+      sortedFrequencyURL2: [],
       compareMode: "page"
     };
   },
@@ -166,26 +188,62 @@ export default {
       if (!this.$refs["tag-form"].validate()) {
         return;
       }
-      this.buttonLoading = true;
-      const requestFirst = axios.post(whichURL, {
-        url: this.urlFieldModel1
-      });
-      const requestSecond = axios.post(whichURL, {
-        url: this.urlFieldModel2
-      });
-      axios
-        .all([requestFirst, requestSecond])
-        .then(
-          axios.spread((...responses) => {
-            const [responseFirst, responseSecond] = responses;
-            this.parser(responseFirst.data, responseSecond.data);
-            this.buttonLoading = false;
-          })
-        )
-        .catch(e => {
-          console.log("Error Received", e);
-          this.buttonLoading = false;
+      if (this.compareMode === "page") {
+        this.buttonLoading = true;
+        const requestFirst = axios.post(whichURL, {
+          url: this.urlFieldModel1
         });
+        const requestSecond = axios.post(whichURL, {
+          url: this.urlFieldModel2
+        });
+        axios
+          .all([requestFirst, requestSecond])
+          .then(
+            axios.spread((...responses) => {
+              const [responseFirst, responseSecond] = responses;
+              this.parser(responseFirst.data, responseSecond.data);
+              this.buttonLoading = false;
+            })
+          )
+          .catch(e => {
+            console.log("Error Received", e);
+            this.buttonLoading = false;
+          });
+      } else {
+        console.log("URL Compare");
+        this.urlParser();
+      }
+    },
+    urlParser: function() {
+      /*
+       * Filter numbers & empty array items
+       * */
+      const parsedFirst = createWords(this.urlFieldModel1).filter(
+        word => word !== "" && isNaN(Number(word))
+      );
+      this.sortedFrequencyURL1 = reducerFrequency(parsedFirst).filter(
+        m => m.text !== "" && isNaN(m.text)
+      );
+
+      this.sortedFrequencyURL2 = this.urlFieldModel3
+        .map(url => {
+          console.log("Traverse url", url);
+          return {
+            url: url,
+            keywords: createWords(url)
+          };
+        })
+        .map(m => {
+          return {
+            url: m.url,
+            frequencyList: reducerFrequency(m.keywords).filter(
+              m => m.text !== "" && isNaN(m.text)
+            )
+          };
+        });
+      this.buttonDisabled = false;
+      console.log("Parsed First", this.sortedFrequencyURL1);
+      console.log("Parsed Second", this.sortedFrequencyURL2);
     },
     parser: function(v1, v2) {
       const html1 = new DOMParser().parseFromString(v1, "text/html");
