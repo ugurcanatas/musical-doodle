@@ -29,31 +29,31 @@ yarn lint
 ```
 
 ## Main Components
-###```1- URLFrekans.vue```
+```1- URLFrekans.vue```
 ![](gifs/gif-page-1.gif)
 
-###```2- KeywordsFromWebPage.vue```
+```2- KeywordsFromWebPage.vue```
 - By URL
   ![](gifs/gif-page-2.gif)
 - By WebPage
   
-###```3- SiteRankingComponent.vue```
+```3- SiteRankingComponent.vue```
 
-###```4- SemantikAnalizComponent.vue```
+```4- SemantikAnalizComponent.vue```
 
 #TODO Status (components)
-###```1- URLFrekans.vue```
+```1- URLFrekans.vue```
 - [x] Completed
-###```2- KeywordsFromWebPage.vue```
+```2- KeywordsFromWebPage.vue```
 - [x] Component Completed
 - [ ] Create a new scoring formula
 - [ ] Try to implement same logic when comparing urls & webpages (Parsed object
   structures are different.)
 
-###```3- SiteRankingComponent.vue(incomplete)```
+```3- SiteRankingComponent.vue(incomplete)```
 - [ ] Component Completed
 
-###```4- SemantikAnalizComponent.vue```
+```4- SemantikAnalizComponent.vue```
 - [x] Component Completed
 - [x] URL implemented
 - [ ] WebPage implemented

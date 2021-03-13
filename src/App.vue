@@ -37,10 +37,19 @@
       </v-row>
     </v-main>
     <v-fade-transition>
-    <v-btn @click="goTop" v-show="showUpBtn" small fixed right bottom
-           class="indigo accent-3" fab icon>
-      <v-icon class="white--text">mdi-chevron-up</v-icon>
-    </v-btn>
+      <v-btn
+        @click="goTop"
+        v-show="showUpBtn"
+        small
+        fixed
+        right
+        bottom
+        class="indigo accent-3"
+        fab
+        icon
+      >
+        <v-icon class="white--text">mdi-chevron-up</v-icon>
+      </v-btn>
     </v-fade-transition>
   </v-app>
 </template>
@@ -49,8 +58,7 @@
 import URLFrekans from "@/components/childs/URLFrekansComponents/URLFrekans";
 import SiteRankingComponent from "@/components/childs/SiteSıralama/SiteRankingComponent";
 import SemantikAnalizComponent from "@/components/childs/SemantikAnaliz/SemantikAnalizComponent";
-import KeywordsFromWebpage
-  from "@/components/childs/URLAnahtarKelimeComponent/URLKeywordComponents/KeywordsFromWebpage";
+import KeywordsFromWebpage from "@/components/childs/URLAnahtarKelimeComponent/URLKeywordComponents/KeywordsFromWebpage";
 
 export default {
   name: "App",
@@ -85,15 +93,15 @@ export default {
       }
     ]
   }),
-  mounted () {
-    document.addEventListener('scroll', this.scrollEvent, false);
+  mounted() {
+    document.addEventListener("scroll", this.scrollEvent, false);
   },
   methods: {
-    scrollEvent: function () {
+    scrollEvent: function() {
       this.showUpBtn = window.scrollY > 300;
     },
-    goTop: function () {
-      window.scrollTo(0,0)
+    goTop: function() {
+      window.scrollTo(0, 0);
     }
   }
 };
