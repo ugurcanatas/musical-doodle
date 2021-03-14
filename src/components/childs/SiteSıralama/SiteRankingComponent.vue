@@ -86,13 +86,12 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+    <site-ranking-dialog :url-name="urlFieldModel1" :main-list="mainList" />
   </div>
 </template>
 
 <script>
-/*eslint-disable*/
 import SiteRankingDialog from "@/components/childs/SiteSıralama/SiteRankingDialog";
-import { v4 as uuidv4 } from "uuid";
 import {
   defaultRule,
   reducerFrequency,
@@ -124,10 +123,9 @@ export default {
       buttonLoading: false,
       buttonDisabled: true,
       showDialog: false,
-      treeView: [],
-      depthURLS: [],
-      treeSelection: [],
-      urlSet: []
+      urlSet: [],
+      mainList: [],
+      urlSetList: []
     };
   },
   computed: {
@@ -185,8 +183,9 @@ export default {
         .split(" ")
         .filter(m => m !== "");
       console.log("Elements Parsed Text", words);
-      const mainFrequency = reducerFrequency(words);
-      console.log("mainFrequency", mainFrequency);
+      //const mainFrequency = reducerFrequency(words);
+      this.mainList = reducerFrequency(words);
+      console.log("mainFrequency", this.mainList);
     },
     parseSet: function(datas) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
@@ -208,7 +207,6 @@ export default {
           frequencyList: reducerFrequency(words),
           anchors: anchorElements
             .map(m => {
-              console.log("PathName", m.pathname);
               const pathname = m.pathname;
               if (pathname !== "/") {
                 const splittedPath = pathname.split("/");
@@ -233,10 +231,9 @@ export default {
                 tree: tree.map(v => {
                   const { path } = v;
                   const words = path.replace(keywordRegex, " ").split(" ");
-                  console.log("REPLACED", words);
                   return {
                     ...v,
-                    words: words.filter(w => isNaN(w))
+                    words: reducerFrequency(words.filter(w => isNaN(w)))
                   };
                 })
               };
