@@ -13,7 +13,9 @@
         class="align-center"
         no-gutters
       >
-        <v-card-title class="py-2 white--text">{{componentItem.label}} </v-card-title>
+        <v-card-title class="py-2 white--text"
+          >{{ componentItem.label }}
+        </v-card-title>
       </v-row>
 
       <div class="subtitle-1 mx-4 pb-0 pt-4">
@@ -192,6 +194,8 @@ export default {
         console.log("FİLTERS", selectors);
         const htmlData = new DOMParser().parseFromString(v, "text/html");
         const domElements = [...htmlData.querySelectorAll(selectors)];
+        const anchorElements = [...htmlData.querySelectorAll("a")];
+        console.log("Anchors", anchorElements);
         const words = domElements
           .map(m => m.innerText)
           .join(" ")
@@ -201,7 +205,42 @@ export default {
         console.log("Elements Parsed for Second", words);
         return {
           url: this.urlFieldModel2[i],
-          frequencyList: reducerFrequency(words)
+          frequencyList: reducerFrequency(words),
+          anchors: anchorElements
+            .map(m => {
+              console.log("PathName", m.pathname);
+              const pathname = m.pathname;
+              if (pathname !== "/") {
+                const splittedPath = pathname.split("/");
+                if (splittedPath.length < 5) {
+                  return {
+                    depth: splittedPath.length,
+                    tree: splittedPath.map((v, index) => {
+                      return {
+                        path: v === "" ? "/" : v,
+                        depthIndex: index
+                      };
+                    })
+                  };
+                }
+              }
+            })
+            .filter(m => m)
+            .map(m => {
+              const { tree } = m;
+              return {
+                ...m,
+                tree: tree.map(v => {
+                  const { path } = v;
+                  const words = path.replace(keywordRegex, " ").split(" ");
+                  console.log("REPLACED", words);
+                  return {
+                    ...v,
+                    words: words.filter(w => isNaN(w))
+                  };
+                })
+              };
+            })
         };
       });
       console.log("Set Of Url's", setOfUrls);
