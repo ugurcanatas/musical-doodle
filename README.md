@@ -24,7 +24,6 @@ yarn lint
 ### Dependencies
 ```
 - [axios]: used for fetching data. (Can be replaced with javascript fetch API)
-- [uuid]: used in nested tree elements rather than using index value.
 - [vuetify]: UI components
 ```
 
@@ -43,7 +42,8 @@ yarn lint
 
 #TODO Status (components)
 ```1- URLFrekans.vue```
-- [x] Completed
+- [x] Component Completed
+
 ```2- KeywordsFromWebPage.vue```
 - [x] Component Completed
 - [ ] Create a new scoring formula
@@ -51,7 +51,8 @@ yarn lint
   structures are different.)
 
 ```3- SiteRankingComponent.vue(incomplete)```
-- [ ] Component Completed
+- [X] Component Completed
+- [ ] Scoring logic
 
 ```4- SemantikAnalizComponent.vue```
 - [x] Component Completed

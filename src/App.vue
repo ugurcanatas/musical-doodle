@@ -111,6 +111,22 @@ export default {
 svg text {
   font-family: "Roboto", sans-serif;
 }
+.code-url-path {
+  color: white !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #e7b536 !important;
+  box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.15);
+}
+.code-depth-label {
+  color: white !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #365ce7 !important;
+  box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.15);
+}
 .code-matched-ratio {
   color: white !important;
   font-size: 24px !important;

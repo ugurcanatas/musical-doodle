@@ -235,6 +235,9 @@ export default {
                   const words = path.replace(keywordRegex, " ").split(" ");
                   return {
                     ...v,
+                    showUrlWords: false,
+                    colorOpen: '#5ade7f',
+                    colorClose: '#e7e7e7',
                     words: reducerFrequency(words.filter(w => isNaN(w)))
                   };
                 })
