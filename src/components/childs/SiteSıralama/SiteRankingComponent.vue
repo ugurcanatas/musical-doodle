@@ -86,7 +86,7 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-    <site-ranking-dialog :url-name="urlFieldModel1" :main-list="mainList" />
+    <site-ranking-dialog :url-name="urlFieldModel1" :main-list="mainList" :url-set-list="urlSetList" />
   </div>
 </template>
 
@@ -183,13 +183,12 @@ export default {
         .split(" ")
         .filter(m => m !== "");
       console.log("Elements Parsed Text", words);
-      //const mainFrequency = reducerFrequency(words);
       this.mainList = reducerFrequency(words);
       console.log("mainFrequency", this.mainList);
     },
     parseSet: function(datas) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
-      const setOfUrls = datas.map((v, i) => {
+      this.urlSetList = datas.map((v, i) => {
         console.log("FİLTERS", selectors);
         const htmlData = new DOMParser().parseFromString(v, "text/html");
         const domElements = [...htmlData.querySelectorAll(selectors)];
@@ -205,13 +204,16 @@ export default {
         return {
           url: this.urlFieldModel2[i],
           frequencyList: reducerFrequency(words),
+          showNodes: false,
+          showKeywords: false,
           anchors: anchorElements
             .map(m => {
               const pathname = m.pathname;
               if (pathname !== "/") {
                 const splittedPath = pathname.split("/");
-                if (splittedPath.length < 5) {
+                if (splittedPath.length < 4) {
                   return {
+                    pathname,
                     depth: splittedPath.length,
                     tree: splittedPath.map((v, index) => {
                       return {
@@ -240,7 +242,7 @@ export default {
             })
         };
       });
-      console.log("Set Of Url's", setOfUrls);
+      console.log("Set Of Url's", this.urlSetList);
     }
   }
 };

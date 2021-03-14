@@ -134,6 +134,16 @@ svg text {
   background-color: #339236 !important;
   box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.25);
 }
+
+.code-card-title {
+  color: #000000 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  font-family: "Menlo", sans-serif !important;
+  background-color: #f3c520 !important;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
 code {
   color: #000000 !important;
   font-size: 16px !important;

@@ -3,7 +3,7 @@
  * */
 export const defaultRule = [v => !!v || "URL Girmelisiniz"];
 
-export const keywordRegex = /[()-,\n?!,*_'":;-]/g;
+export const keywordRegex = /[()-,\n?.@!,*_'":;-]/g;
 
 export const whichURL =
   process.env.NODE_ENV === "development"
