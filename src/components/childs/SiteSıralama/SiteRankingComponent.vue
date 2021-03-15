@@ -86,7 +86,12 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-    <site-ranking-dialog :url-name="urlFieldModel1" :main-list="mainList" :url-set-list="urlSetList" />
+    <site-ranking-dialog
+      v-if="showDialog"
+      :url-name="urlFieldModel1"
+      :main-list="mainList"
+      :url-set-list="urlSetList"
+    />
   </div>
 </template>
 
@@ -160,14 +165,56 @@ export default {
             const mainResponse = responses[0];
             const setResponses = responses.splice(1).map(v => v.data);
             console.log("RESPONSES RANKING", setResponses);
+            this.mainList = this.parseMain(mainResponse.data);
+            const s = this.parseSet(setResponses);
+            this.urlSetList = this.parseAll(this.mainList, s);
+
             this.buttonLoading = false;
-            this.parseMain(mainResponse.data);
-            this.parseSet(setResponses);
+            this.buttonDisabled = false;
           })
         )
         .catch(e => {
           console.log("Error Received", e);
           this.buttonLoading = false;
+          this.buttonDisabled = true;
+        });
+    },
+    parseAll: function(f, s) {
+      return s
+        .map(obj => {
+          const { frequencyList } = obj;
+          return {
+            ...obj,
+            frequencyList: frequencyList
+              .map(flist => {
+                return {
+                  ...flist,
+                  matched: f.some(item => {
+                    return item.text === flist.text;
+                  }),
+                  original_frequency: f.filter(
+                    item => flist.text === item.text
+                  )[0]
+                };
+              })
+              .map(flist => {
+                return {
+                  ...flist,
+                  matchedRatio: flist.matched
+                    ? flist.size / flist.original_frequency.size
+                    : 0
+                };
+              })
+          };
+        })
+        .map(a => {
+          const { frequencyList } = a;
+          return {
+            ...a,
+            total: frequencyList.reduce((c, d) => {
+              return c + d.matchedRatio;
+            },0)
+          };
         });
     },
     parseMain: function(data) {
@@ -185,10 +232,11 @@ export default {
       console.log("Elements Parsed Text", words);
       this.mainList = reducerFrequency(words);
       console.log("mainFrequency", this.mainList);
+      return reducerFrequency(words);
     },
     parseSet: function(datas) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
-      this.urlSetList = datas.map((v, i) => {
+      return datas.map((v, i) => {
         console.log("FİLTERS", selectors);
         const htmlData = new DOMParser().parseFromString(v, "text/html");
         const domElements = [...htmlData.querySelectorAll(selectors)];
@@ -236,8 +284,8 @@ export default {
                   return {
                     ...v,
                     showUrlWords: false,
-                    colorOpen: '#5ade7f',
-                    colorClose: '#e7e7e7',
+                    colorOpen: "#5ade7f",
+                    colorClose: "#e7e7e7",
                     words: reducerFrequency(words.filter(w => isNaN(w)))
                   };
                 })
@@ -245,7 +293,6 @@ export default {
             })
         };
       });
-      console.log("Set Of Url's", this.urlSetList);
     }
   }
 };

@@ -145,37 +145,14 @@ export default {
   },
   data() {
     return {
+      showSelect: {},
       selectionModel: [],
       show: false,
-      active: true
+      active: true,
     };
   },
-  computed: {},
-  methods: {
-    getColors: function(i) {
-      switch (i) {
-        case 0:
-          return "#FFD700";
-        case 1:
-          return "#C0C0C0";
-        case 2:
-          return "#cd7f32";
-        default:
-          return "#7a8add";
-      }
-    },
-    getPrize: function(i) {
-      switch (i) {
-        case 0:
-          return "🥇";
-        case 1:
-          return "🥈";
-        case 2:
-          return "🥉";
-        default:
-          return "🏆";
-      }
-    }
+  created () {
+    console.log("JSON", this.urlSetList);
   }
 };
 </script>

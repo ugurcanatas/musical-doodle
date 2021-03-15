@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-4 pb-0 pt-4" style="overflow:scroll;">
+  <div class="mx-4 pb-0 pt-4">
     <pre>
       <label>İçerik & Frekanslar:</label>
       <v-row no-gutters>
@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import {getColors} from "@/components/utils";
+
 export default {
   name: "KeywordsComp",
   props: {
@@ -32,18 +34,7 @@ export default {
     }
   },
   methods: {
-    getColors: function(i) {
-      switch (i) {
-        case 0:
-          return "#FFD700";
-        case 1:
-          return "#C0C0C0";
-        case 2:
-          return "#cd7f32";
-        default:
-          return "#7a8add";
-      }
-    }
+    getColors
   }
 };
 </script>

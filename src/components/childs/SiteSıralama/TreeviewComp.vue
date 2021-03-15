@@ -26,7 +26,7 @@
           <div
             v-for="(tree, tIndex) in node.tree"
             :key="tIndex"
-            :style="`margin-left:${getMargin(tIndex)}px;`"
+            :style="`margin-left:${getFileMargin(tIndex)}px;`"
           >
             <div>
               <v-row no-gutters>
@@ -78,6 +78,8 @@
 </template>
 
 <script>
+import {getColors,getFileMargin} from "@/components/utils";
+
 export default {
   name: "TreeviewDialog",
   props: {
@@ -93,30 +95,8 @@ export default {
     };
   },
   methods: {
-    getColors: function(i) {
-      switch (i) {
-        case 0:
-          return "#FFD700";
-        case 1:
-          return "#C0C0C0";
-        case 2:
-          return "#cd7f32";
-        default:
-          return "#7a8add";
-      }
-    },
-    getMargin: function (i) {
-      switch (i) {
-        case 0:
-          return 0;
-        case 1:
-          return 30;
-        case 2:
-          return 60;
-        default:
-          return 0;
-      }
-    }
+    getColors,
+    getFileMargin
   }
 };
 </script>

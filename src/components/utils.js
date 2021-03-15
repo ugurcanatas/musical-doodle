@@ -83,3 +83,42 @@ export const reducerFrequency = data => {
     })
     .sort((a, b) => (a.size < b.size ? 1 : -1));
 };
+
+export const getPrize = i => {
+  switch (i) {
+    case 0:
+      return "🥇";
+    case 1:
+      return "🥈";
+    case 2:
+      return "🥉";
+    default:
+      return "🏆";
+  }
+};
+
+export const getColors = i => {
+  switch (i) {
+    case 0:
+      return "#FFD700";
+    case 1:
+      return "#C0C0C0";
+    case 2:
+      return "#cd7f32";
+    default:
+      return "#7a8add";
+  }
+};
+
+export const getFileMargin = i => {
+  switch (i) {
+    case 0:
+      return 0;
+    case 1:
+      return 30;
+    case 2:
+      return 60;
+    default:
+      return 0;
+  }
+};
