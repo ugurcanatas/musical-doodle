@@ -227,7 +227,6 @@ export default {
           };
         });
     },
-    /*eslint-disable*/
     lookupFreqList: function(anchors, freqList) {
       const filteredAnchors = anchors.map(a => {
         return a.tree;

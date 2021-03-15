@@ -3,8 +3,15 @@
  * */
 export const defaultRule = [v => !!v || "URL Girmelisiniz"];
 
+/*
+ * Search regex that we use for replacing characters
+ * other than alphabetical characters
+ * */
 export const keywordRegex = /[()-,\n?.@!,*_'":;-]/g;
 
+/*
+ * Decides which URL to use on dev/production
+ * */
 export const whichURL =
   process.env.NODE_ENV === "development"
     ? process.env.VUE_APP_DEV_URL
@@ -71,12 +78,18 @@ export const createWords = url => {
   return pathReplaced.split("-");
 };
 
+/**
+ * @param data : Array - array that contains words
+ * -Reduce Function: Creates an object that contains each word & frequency values
+ * as key/value pairs. eg { "Surely": 5, .... }
+ * -Return portion: Takes the created object returns key as text property
+ * and value as size property. Then sort by size.
+ * */
 export const reducerFrequency = data => {
   const obj = data.reduce((p, c) => {
     p[c] = (p[c] || 0) + 1;
     return p;
   }, {});
-
   return Object.entries(obj)
     .map(([k, v]) => {
       return { text: k, size: v };
@@ -84,6 +97,9 @@ export const reducerFrequency = data => {
     .sort((a, b) => (a.size < b.size ? 1 : -1));
 };
 
+/*
+ * UI Stuff. getPrize returns an emoji for index 0,1 and 2
+ * */
 export const getPrize = i => {
   switch (i) {
     case 0:
@@ -97,6 +113,9 @@ export const getPrize = i => {
   }
 };
 
+/*
+ * UI Stuff. getColors returns a color for index 0,1 and 2
+ * */
 export const getColors = i => {
   switch (i) {
     case 0:
@@ -110,6 +129,10 @@ export const getColors = i => {
   }
 };
 
+/*
+ * UI Stuff. getFileMargin returns a fixed margin for index.
+ * (Used in treeview (see: TreeviewComp.vue))
+ * */
 export const getFileMargin = i => {
   switch (i) {
     case 0:
