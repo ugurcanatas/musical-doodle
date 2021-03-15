@@ -211,11 +211,50 @@ export default {
           const { frequencyList } = a;
           return {
             ...a,
-            total: frequencyList.reduce((c, d) => {
-              return c + d.matchedRatio;
-            },0)
+            total:
+              (frequencyList.reduce((c, d) => {
+                return c + d.matchedRatio;
+              }, 0) *
+                100) /
+              frequencyList.length
+          };
+        })
+        .map(a => {
+          const { frequencyList, anchors } = a;
+          return {
+            ...a,
+            anchorsTotal: this.lookupFreqList(anchors,frequencyList),
           };
         });
+    },
+    /*eslint-disable*/
+    lookupFreqList: function(anchors, freqList) {
+      const filteredAnchors = anchors.map(a => {
+        return a.tree;
+      }).map(a => {
+        return a.reduce((c,v) => {
+          c = v.words;
+          return c.reduce((d,e) => {
+            d = e;
+            return d;
+          })
+        }, {})
+      })
+      let total = 0;
+      filteredAnchors.forEach(v => {
+        freqList.forEach(a => {
+          if (a.matched) {
+            if (a.text === v.text) {
+              console.log("MATCHED", a)
+              console.log("MATCHED", v)
+              total = total + v.size / a.original_frequency.size
+            }
+          }
+        })
+      })
+      console.log("FilteredAnchors", filteredAnchors);
+      console.log("TOTAL VALUES", total / filteredAnchors.length)
+      return total;
     },
     parseMain: function(data) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");

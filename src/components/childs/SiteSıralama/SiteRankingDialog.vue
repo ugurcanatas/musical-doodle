@@ -33,9 +33,17 @@
               : `background-color:#efefef`
           "
           :key="item.url"
-          v-for="(item, key) in urlSetList"
+          v-for="(item, key) in getSortedSet"
           no-gutters
         >
+          <v-row no-gutters class="justify-center">
+          <p class="mb-0" style="font-size: 52px;">{{ getPrize(key) }}</p>
+          <v-col class="col-12 text-center">
+            <code class="code-matched-ratio">{{
+              item.anchorsTotal + item.total
+            }} Puan</code>
+          </v-col>
+          </v-row>
           <div class="mx-4 pb-0 pt-4">
             <pre
               class="my-0"
@@ -116,6 +124,8 @@
 <script>
 import TreeviewDialog from "@/components/childs/SiteSıralama/TreeviewComp";
 import KeywordsComp from "@/components/childs/SiteSıralama/KeywordsComp";
+import { getPrize } from "@/components/utils";
+
 export default {
   name: "SiteRankingDialog",
   components: {
@@ -148,11 +158,24 @@ export default {
       showSelect: {},
       selectionModel: [],
       show: false,
-      active: true,
+      active: true
     };
   },
-  created () {
+  computed: {
+    getSortedSet: function() {
+      const data = this.urlSetList;
+      return data.sort((a, b) => {
+        const total1 = a.total + a.anchorsTotal;
+        const total2 = b.total + b.anchorsTotal;
+        return total2 - total1;
+      });
+    }
+  },
+  created() {
     console.log("JSON", this.urlSetList);
+  },
+  methods: {
+    getPrize
   }
 };
 </script>
