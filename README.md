@@ -47,7 +47,7 @@ yarn lint
 ```2- KeywordsFromWebPage.vue```
 - [x] Component Completed
 - [ ] Create a new scoring formula
-- [ ] Try to implement same logic when comparing urls & webpages (Parsed object
+- [x] Try to implement same logic when comparing urls & webpages (Parsed object
   structures are different.)
 
 ```3- SiteRankingComponent.vue(incomplete)```
