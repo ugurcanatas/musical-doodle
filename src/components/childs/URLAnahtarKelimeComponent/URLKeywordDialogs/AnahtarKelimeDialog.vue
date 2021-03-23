@@ -211,7 +211,7 @@ export default {
       console.log("Frequency Score", frequencyScore);
       console.log("Similarity Score", similarScore);
 
-      const totalScore = frequencyScore + similarScore; // this.sortedFrequency2.length;
+      const totalScore = (similarScore / similars.length) * 100; // this.sortedFrequency2.length;
       const svgText = document.querySelector("#svgBenzerlikText");
       svgText.innerHTML = `${(totalScore > 100 ? 100 : totalScore).toFixed(0)}`;
       const svgRectangle = document.querySelector("#svgBenzerlik");
@@ -227,16 +227,11 @@ export default {
       console.log("Similar Total", totalScore);
     },
     mapPoints: function(p1, p2) {
-      const minus = Math.abs(p1 - p2);
-      if (minus === 0) {
-        return 2;
-      } else if (1 <= minus <= 2) {
-        return 1.5;
-      } else if (2 < minus <= 4) {
+      const ratio = p2/p1;
+      if (ratio > 1) {
         return 1;
-      } else {
-        return 0.5;
       }
+      return ratio;
     },
     getColors: function(i) {
       switch (i) {

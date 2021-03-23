@@ -203,42 +203,7 @@ export default {
       console.log("Semantic");
       if (this.compareMode === "url") {
         this.urlParser();
-      } /*else {
-        console.log("Page Parser Called");
-        const firstRequest = axios.post(whichURL, { url: this.urlFieldFix });
-        const urlSetRequests = this.urlFieldModel.map(v =>
-          axios.post(whichURL, { url: v })
-        );
-        axios
-          .all([firstRequest, ...urlSetRequests])
-          .then(
-            axios.spread((...responses) => {
-              console.log("URL Set Responses", responses[0]);
-              //const selectors = this.chipModel.map(v => this.chips[v]).join(",");
-              const html1 = new DOMParser().parseFromString(
-                responses[0].data,
-                "text/html"
-              );
-              const firstElements = [...html1.querySelectorAll("meta")];
-              console.log("Elements Found", firstElements);
-              //console.log("URL Set Responses", responses.splice(1));
-              const filtered = firstElements
-                .filter(m => {
-                  const attribute = m.getAttribute("name");
-                  return this.chips[this.chipModel] === attribute && m;
-                })
-                .map(m => m.getAttribute("content"))
-                .join("")
-                .replace(keywordRegex, " ")
-                .split(" ")
-                .filter(m => m.length !== 0);
-              console.log("FİLTERED", filtered);
-            })
-          )
-          .catch(e => {
-            console.log("Error Received", e);
-          });
-      }*/
+      }
     },
     pageParser: function(v) {
       const selectors = this.chipModel.map(v => this.chips[v]).join(",");
