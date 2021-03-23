@@ -19,31 +19,7 @@
             ><label>URL:</label><code>{{ getFirstUrl.url }}</code></pre>
           </div>
           <v-divider class="mx-4"></v-divider>
-
-          <v-card-title class="pb-2">Anahtar Kelimeler</v-card-title>
-          <v-card-text
-            v-for="(item, i) in getFirstUrl.frequencyList"
-            :key="i"
-            class="pb-0"
-          >
-            <div>
-              <pre>
-                <label>Kelime:</label>
-                <v-row no-gutters>
-                <code class="code-single-text">{{ item.text }}</code>
-                  <code class="code-single-text ml-4">{{ item.size }}</code>
-                    </v-row>
-                <v-divider class="mt-4"></v-divider>
-              <label>Alakalı kelimeler:</label>
-                <v-row no-gutters>
-                <div class="mr-4" v-for="(obj, z) in item.request"
-                     :key="z">
-                <code class="code-semantics" :style="`background-color:${getColors(obj)} !important;`">{{obj.term}}</code>
-                  </div>
-                  </v-row>
-              </pre>
-            </div>
-          </v-card-text>
+          <semantic-keywords :frequency-list="getFirstUrl.frequencyList" />
         </v-card>
       </v-col>
 
@@ -70,29 +46,8 @@
                   </span>
               </pre>
             </div>
-            <v-card-title class="pb-2">Anahtar Kelimeler</v-card-title>
-            <v-card-text
-              v-for="(freq, i) in item.frequencyList"
-              :key="i"
-              class="pb-0"
-            >
-              <div>
-                <pre><label>Kelime:</label>
-                  <v-row no-gutters>
-              <code class="code-single-text">{{ freq.text }}</code>
-                  <code class="code-single-text ml-4">{{ freq.size }}</code>
-                    </v-row>
-                <v-divider class="mt-4"></v-divider>
-              <label>Alakalı kelimeler:</label>
-                <v-row no-gutters>
-                <div class="mr-4" v-for="(obj, z) in freq.request"
-                     :key="z">
-                <code class="code-semantics" :style="`background-color:${getColors(obj)} !important;`">{{obj.term}}</code>
-                  </div>
-                  </v-row>
-              </pre>
-              </div>
-            </v-card-text>
+            <semantic-keywords :frequency-list="item.frequencyList" />
+            <v-divider class="ma-4"></v-divider>
           </v-card-text>
         </v-card>
       </v-col>
@@ -101,8 +56,12 @@
 </template>
 
 <script>
+import SemanticKeywords from "@/components/childs/SemantikAnaliz/SemanticKeywords";
 export default {
   name: "CompareUrls",
+  components: {
+    SemanticKeywords
+  },
   props: {
     dataFirstUrl: {
       type: Array,
@@ -115,7 +74,8 @@ export default {
   },
   data() {
     return {
-      sortedUrlSet: []
+      sortedUrlSet: [],
+      active: true
     };
   },
   computed: {
@@ -167,7 +127,7 @@ export default {
       return sorted2;
     },
     getSortedURLSet: function() {
-      const sortedUrlSet = this.getValues
+      return this.getValues
         .map(v => {
           const { url, frequencyList } = v;
           const justMatched = frequencyList.filter(obj => obj["matched"]);
@@ -209,8 +169,6 @@ export default {
           };
         })
         .sort((a, b) => b.matchedRatio - a.matchedRatio);
-      console.log("UPDATED VALUES", sortedUrlSet);
-      return sortedUrlSet;
     }
   },
   methods: {
@@ -236,17 +194,6 @@ export default {
       console.log("RATIO", ratio);
       return ratio;
     },
-    getColors: function(obj) {
-      const { similarity } = obj;
-      switch (similarity) {
-        case "100":
-          return "#f83838";
-        case "50":
-          return "#f37b42";
-        default:
-          return "#de9d7f";
-      }
-    }
   }
 };
 </script>

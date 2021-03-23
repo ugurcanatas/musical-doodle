@@ -90,7 +90,8 @@ import {
   defaultRule,
   reducerFrequency,
   urlSet,
-  whichURL
+  whichURL,
+    keywordRegex
 } from "@/components/utils";
 
 export default {
@@ -172,7 +173,7 @@ export default {
       console.log("Pler", pElements);
       const texts = pElements.map(p => p.innerText);
       console.log("HTML", this.htmlData);
-      this.scrapedText = texts.join(" ").replace(/[.()-,\n?!,*'":;]/g, "");
+      this.scrapedText = texts.join(" ").replace(keywordRegex, "");
       this.eachWordArray = this.scrapedText
         .split(" ")
         .filter(m => m.length !== 0);
